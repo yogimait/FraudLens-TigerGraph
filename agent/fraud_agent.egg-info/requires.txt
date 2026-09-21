@@ -1,0 +1,10 @@
+langgraph
+langchain-core
+groq
+typesafe-sdk
+pyTigerGraph
+tigergraph-mcp
+pydantic
+python-dotenv
+fastapi
+uvicorn

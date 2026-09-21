@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: fraud-agent
+Version: 0.1.0
+Summary: TigerGraph Agentic Fraud Investigation Agent
+Requires-Python: >=3.10
+Requires-Dist: langgraph
+Requires-Dist: langchain-core
+Requires-Dist: groq
+Requires-Dist: typesafe-sdk
+Requires-Dist: pyTigerGraph
+Requires-Dist: tigergraph-mcp
+Requires-Dist: pydantic
+Requires-Dist: python-dotenv
+Requires-Dist: fastapi
+Requires-Dist: uvicorn

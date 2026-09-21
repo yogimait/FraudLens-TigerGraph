@@ -1,0 +1,21 @@
+[project]
+name = "fraud-agent"
+version = "0.1.0"
+description = "TigerGraph Agentic Fraud Investigation Agent"
+requires-python = ">=3.10"
+dependencies = [
+    "langgraph",
+    "langchain-core",
+    "groq",
+    "typesafe-sdk",
+    "pyTigerGraph",
+    "tigergraph-mcp",
+    "pydantic",
+    "python-dotenv",
+    "fastapi",
+    "uvicorn",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

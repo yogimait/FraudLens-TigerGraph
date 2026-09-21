@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+dist/
+build/
+__pycache__/
+*.pyc
+venv/
+
+# User requested exclusions
+tigergraph/
+Initial-docs/
+cases/
