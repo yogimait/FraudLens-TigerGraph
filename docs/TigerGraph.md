@@ -10,33 +10,24 @@
 3. **Enable auto-stop and auto-start** (challenge requirement)
 4. Note: free tier; stop workspace when not using
 
-### TigerGraph MCP
-```bash
-pip install tigergraph-mcp
-```
-- Requires Python 3.10–3.14
-- Requires TigerGraph 4.1+ (4.2+ for TigerVector)
-- Supports **stdio** and **streamable HTTP** transports
-- Repo: https://github.com/tigergraph/tigergraph-mcp
-
-Run MCP server:
-```bash
-# Streamable HTTP (for agent to connect remotely)
-tigergraph-mcp --transport streamable-http --port 8001
-
-# Or stdio (for same-process usage)
-tigergraph-mcp --transport stdio
+### TigerGraph Connection (pyTigerGraph)
+We connect directly to the Savanna instance using `pyTigerGraph` instead of a separate MCP server to reduce infrastructure overhead.
+```python
+import pyTigerGraph as tg
+conn = tg.TigerGraphConnection(host=..., graphname=..., gsqlSecret=...)
+conn.getToken(conn.createSecret())
 ```
 
-## Key GSQL Queries
+## Key GSQL Queries (Ad-Hoc INTERPRET QUERY)
+
+To avoid managing installed queries on the Savanna instance, we use ad-hoc `INTERPRET QUERY` blocks executed via `conn.runInterpretedQuery()`.
 
 ### 1. `get_card_transactions` — Card transaction history
 ```gsql
-CREATE QUERY get_card_transactions(VERTEX<Card> card, DATETIME start_time, DATETIME end_time) FOR GRAPH fraud_graph {
-  txns = SELECT t FROM card:c -(MADE>)- Transaction:t
-         WHERE t.ts >= start_time AND t.ts <= end_time
-         ORDER BY t.ts ASC;
-  PRINT txns;
+INTERPRET QUERY (STRING c_id) FOR GRAPH fraud_graph {
+  Start = {Card.*};
+  Txns = SELECT t FROM Start:s -(MADE:e)-> Transaction:t WHERE s.card_id == c_id;
+  PRINT Txns;
 }
 ```
 
@@ -50,10 +41,11 @@ CREATE QUERY get_device_neighbors(VERTEX<DeviceProfile> device) FOR GRAPH fraud_
 
 ### 3. `get_card_sequence` — Recent transactions in time window
 ```gsql
-CREATE QUERY get_card_sequence(VERTEX<Card> card, INT hours) FOR GRAPH fraud_graph {
+INTERPRET QUERY (STRING c_id, INT hours) FOR GRAPH fraud_graph {
   now_minus_hours = datetime_sub(now(), INTERVAL hours HOUR);
-  txns = SELECT t FROM card:c -(MADE>)- Transaction:t
-         WHERE t.ts >= now_minus_hours
+  Start = {Card.*};
+  txns = SELECT t FROM Start:c -(MADE>)- Transaction:t
+         WHERE c.card_id == c_id AND t.ts >= now_minus_hours
          ORDER BY t.ts ASC;
   PRINT txns;
 }

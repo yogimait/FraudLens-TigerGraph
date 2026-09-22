@@ -126,7 +126,7 @@ class InvestigationState(TypedDict):
 - Check for out-of-region activity
 - Calculate deterministic features (velocity, amount anomaly, region history)
 
-**Tools** (TigerGraph MCP):
+**Tools** (pyTigerGraph GSQL INTERPRET):
 - `get_customer_cards(customer_id)` — all cards for customer
 - `get_card_transactions(card_id, time_window)` — txn history
 - `get_transaction_device(txn_id)` — device profile
@@ -333,24 +333,24 @@ def evidence_sufficient(state: InvestigationState) -> str:
 
 | Tool | Type | TigerGraph? | Mutating? | Approval? |
 |---|---|---|---|---|
-| `get_transaction` | Read | Yes (MCP) | No | No |
-| `get_customer_cards` | Read | Yes (MCP) | No | No |
-| `get_card_transactions` | Read | Yes (MCP) | No | No |
-| `get_transaction_device` | Read | Yes (MCP) | No | No |
-| `get_device_neighbors` | Read | Yes (MCP) | No | No |
-| `get_region_history` | Read | Yes (MCP) | No | No |
-| `get_card_sequence` | Read | Yes (MCP) | No | No |
-| `get_email_connections` | Read | Yes (MCP) | No | No |
+| `get_transaction` | Read | Yes (pyTigerGraph) | No | No |
+| `get_customer_cards` | Read | Yes (pyTigerGraph) | No | No |
+| `get_card_transactions` | Read | Yes (pyTigerGraph) | No | No |
+| `get_transaction_device` | Read | Yes (pyTigerGraph) | No | No |
+| `get_device_neighbors` | Read | Yes (pyTigerGraph) | No | No |
+| `get_region_history` | Read | Yes (pyTigerGraph) | No | No |
+| `get_card_sequence` | Read | Yes (pyTigerGraph) | No | No |
+| `get_email_connections` | Read | Yes (pyTigerGraph) | No | No |
 | `search_similar_cases` | Read | Yes (vector) | No | No |
-| `get_closed_cases_for_card` | Read | Yes (MCP) | No | No |
-| `get_closed_cases_for_customer` | Read | Yes (MCP) | No | No |
+| `get_closed_cases_for_card` | Read | Yes (pyTigerGraph) | No | No |
+| `get_closed_cases_for_customer` | Read | Yes (pyTigerGraph) | No | No |
 | `classify_pattern` | Classification | No (Jev) | No | No |
 | `assess_sufficiency` | Classification | No (Jev) | No | No |
 | `detect_coordination` | Classification | No (Jev) | No | No |
 | `synthesize_evidence` | Reasoning | No (LLM) | No | No |
 | `generate_summary` | Generation | No (LLM) | No | No |
 | `generate_sar_narrative` | Generation | No (LLM) | No | No |
-| `create_case_vertex` | Write | Yes (MCP) | Yes | No (auto) |
+| `create_case_vertex` | Write | Yes (pyTigerGraph) | Yes | No (auto) |
 | `simulate_customer_response` | Simulation | No | No | No |
 
 ## Error Handling
@@ -360,7 +360,7 @@ def evidence_sufficient(state: InvestigationState) -> str:
 | TigerGraph query fails | Retry once, then proceed with available evidence |
 | LLM call fails | Retry with exponential backoff (max 3) |
 | Jev call fails | Fall back to LLM-only classification |
-| MCP connection lost | Retry connection, fail case if persistent |
+| pyTigerGraph connection lost | Retry connection, fail case if persistent |
 | No transactions found | Set verdict = uncertain, escalate |
 | Investigation timeout (>120s) | Stop, generate outputs with available evidence |
 

@@ -4,7 +4,7 @@ import requests
 import json
 import os
 
-API_URL = "http://localhost:3001/cases/{}/trigger"
+API_URL = os.environ.get("API_URL", "http://localhost:3001") + "/cases/{}/trigger"
 CASE_PACK_PATH = os.path.join(os.path.dirname(__file__), "../../Initial-docs/dataset/case_pack.csv")
 
 def run_benchmark():

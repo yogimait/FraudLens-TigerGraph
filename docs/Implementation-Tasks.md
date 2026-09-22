@@ -242,14 +242,14 @@ Ordered task list. Each task includes objective, files, dependencies, acceptance
 ### T5.5 — Action comparison component
 - **Status**: **Completed**
 
-### T5.6 — Basic graph visualization
-- **Status**: **Completed** (Lightweight mock block created)
+### T5.6 — Advanced graph visualization
+- **Status**: **Completed** (Full interactive React Flow graph with custom Card/Txn/Device nodes and Legend)
 
 ### T5.7 — Approval queue page
-- **Status**: **Merged into Investigation view**
+- **Status**: **Completed** (Dedicated `/approvals` split-pane UI)
 
 ### T5.8 — Polish for demo
-- **Status**: **Pending**
+- **Status**: **Completed** (Tailwind animations, proper Empty States, layout fixes)
 
 ---
 

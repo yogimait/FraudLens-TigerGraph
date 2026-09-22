@@ -1,5 +1,8 @@
 "use client";
 
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,64 +10,93 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Download, Filter, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function ReportsPage() {
-  const reports = [
-    { id: 'SAR-2023-11-892', date: '2023-11-15 08:30', caseId: 'CASE-HHG-082', type: 'Suspicious Activity', status: 'Filed', amount: '$12,450.00' },
-    { id: 'SAR-2023-11-891', date: '2023-11-14 14:15', caseId: 'CASE-HHG-019', type: 'Account Takeover', status: 'Filed', amount: '$4,200.00' },
-    { id: 'SAR-2023-11-890', date: '2023-11-14 09:00', caseId: 'CASE-HHG-115', type: 'Structuring', status: 'Draft', amount: '$9,900.00' },
-    { id: 'AUD-2023-11-004', date: '2023-11-10 17:00', caseId: 'N/A', type: 'Weekly Audit Log', status: 'Completed', amount: 'N/A' },
-  ];
+  const router = useRouter();
+  const [sars, setSars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSars();
+  }, []);
+
+  const fetchSars = async () => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/cases`);
+      const sarCases = res.data.filter((c: any) => c.sar?.file === true);
+      setSars(sarCases);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = (caseData: any) => {
+    const text = `SUSPICIOUS ACTIVITY REPORT (SAR)\n================================\nCase ID: ${caseData.case_id}\nDate: ${new Date(caseData.updatedAt).toISOString()}\nExposure: $${caseData.exposure_usd}\nPattern: ${caseData.pattern}\n\nNARRATIVE:\n${caseData.sar.narrative}\n`;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SAR_${caseData.case_id}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="flex-1 p-8 space-y-8 bg-[#F8FAFC]">
-      <div className="flex justify-between items-end">
+    <div className="flex-1 p-8 space-y-8 bg-background relative min-h-screen">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1E2433_1px,transparent_1px),linear-gradient(to_bottom,#1E2433_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none"></div>
+
+      <div className="flex justify-between items-end relative z-10">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Reports & Compliance</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage exported SARs and system audit logs.</p>
+          <h1 className="text-3xl font-serif font-extrabold tracking-tight text-foreground">Reports & Compliance</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage exported SARs and compliance logs.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="text-slate-600 bg-white border-slate-200 shadow-sm"><Filter className="w-4 h-4 mr-2" /> Filter</Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"><Download className="w-4 h-4 mr-2" /> Export All</Button>
+          <Button variant="outline" className="text-foreground bg-card border-border shadow-none hover:bg-secondary"><Filter className="w-4 h-4 mr-2" /> Filter</Button>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-none"><Download className="w-4 h-4 mr-2" /> Export All</Button>
         </div>
       </div>
       
-      <Card className="border-slate-200 shadow-sm overflow-hidden">
+      <Card className="border-border bg-card shadow-none overflow-hidden relative z-10">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50 border-b border-slate-200">
-              <TableRow>
-                <TableHead className="font-semibold text-slate-600 text-xs uppercase tracking-wider">Report ID</TableHead>
-                <TableHead className="font-semibold text-slate-600 text-xs uppercase tracking-wider">Date Generated</TableHead>
-                <TableHead className="font-semibold text-slate-600 text-xs uppercase tracking-wider">Related Case</TableHead>
-                <TableHead className="font-semibold text-slate-600 text-xs uppercase tracking-wider">Type</TableHead>
-                <TableHead className="font-semibold text-slate-600 text-xs uppercase tracking-wider">Exposure</TableHead>
-                <TableHead className="font-semibold text-slate-600 text-xs uppercase tracking-wider">Status</TableHead>
-                <TableHead className="text-right font-semibold text-slate-600 text-xs uppercase tracking-wider">Action</TableHead>
+            <TableHeader className="bg-secondary/50 border-b border-border">
+              <TableRow className="border-none hover:bg-transparent">
+                <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">Report ID</TableHead>
+                <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">Date Generated</TableHead>
+                <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">Related Case</TableHead>
+                <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">Pattern</TableHead>
+                <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">Exposure</TableHead>
+                <TableHead className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">Status</TableHead>
+                <TableHead className="text-right font-semibold text-muted-foreground text-xs uppercase tracking-wider">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reports.map((report, i) => (
-                <TableRow key={i} className="hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0">
-                  <TableCell className="font-mono text-sm font-medium text-slate-900 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-slate-400" />
-                    {report.id}
+              {loading ? (
+                <TableRow><TableCell colSpan={7} className="text-center p-8 text-muted-foreground">Loading SARs...</TableCell></TableRow>
+              ) : sars.length === 0 ? (
+                <TableRow><TableCell colSpan={7} className="text-center p-8 text-muted-foreground">No SARs have been generated yet.</TableCell></TableRow>
+              ) : sars.map((report, i) => (
+                <TableRow key={i} className="hover:bg-secondary/30 transition-colors border-b border-border last:border-0">
+                  <TableCell className="font-mono text-sm font-medium text-foreground flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    SAR-{report.case_id.replace('CASE-', '')}
                   </TableCell>
-                  <TableCell className="text-sm text-slate-600">{report.date}</TableCell>
-                  <TableCell className="text-sm text-blue-600 font-medium hover:underline cursor-pointer">{report.caseId}</TableCell>
-                  <TableCell className="text-sm text-slate-600">{report.type}</TableCell>
-                  <TableCell className="text-sm font-mono text-slate-700">{report.amount}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{new Date(report.updatedAt).toLocaleString()}</TableCell>
+                  <TableCell 
+                    className="text-sm text-primary font-medium hover:underline cursor-pointer"
+                    onClick={() => router.push(`/cases/${report.case_id}`)}
+                  >
+                    {report.case_id}
+                  </TableCell>
+                  <TableCell className="text-sm text-foreground">{report.pattern}</TableCell>
+                  <TableCell className="text-sm font-mono text-foreground">${(report.exposure_usd || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</TableCell>
                   <TableCell>
-                    {report.status === 'Filed' || report.status === 'Completed' ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> {report.status}
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                        {report.status}
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                      <CheckCircle2 className="w-3 h-3 mr-1" /> Ready
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="text-slate-500 hover:text-blue-600">
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => handleDownload(report)}>
                       <Download className="w-4 h-4" />
                     </Button>
                   </TableCell>

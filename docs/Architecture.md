@@ -37,7 +37,7 @@ graph TD
     end
 
     subgraph "Graph Layer"
-        MCP["TigerGraph MCP<br/>Python"]
+        PYTG["pyTigerGraph<br/>Python Client"]
         TG["TigerGraph Savanna<br/>Graph + Vector Store"]
     end
 
@@ -52,8 +52,8 @@ graph TD
     LG --- JEV
     LG --- LLM
     LG --- POLICY
-    LG -->|MCP protocol| MCP
-    MCP --> TG
+    LG -->|Direct API| PYTG
+    PYTG --> TG
     AGENT -.-> LS
 ```
 
@@ -93,11 +93,11 @@ graph TD
 | Answer file JSON generation | |
 | Case writing to TigerGraph | |
 
-### TigerGraph (via MCP)
+### TigerGraph (via pyTigerGraph)
 | Owns | Does NOT own |
 |---|---|
 | Graph storage: vertices, edges, attributes | Investigation logic |
-| GSQL queries for fraud patterns | Policy decisions |
+| GSQL INTERPRET queries for fraud patterns | Policy decisions |
 | Graph algorithms (community detection, PageRank, etc.) | LLM reasoning |
 | GraphRAG: vector search for documents/cases | Answer file generation |
 | Case memory storage | |
@@ -143,12 +143,12 @@ graph TD
 ### Required (challenge mandates)
 - **TigerGraph** (Savanna or CE) — graph + vector storage
 - **GSQL + graph algorithms** — traversal, pattern detection
-- **TigerGraph MCP** — expose graph capabilities to agent
+- **pyTigerGraph** — expose graph capabilities to agent (replacing MCP for simpler deployment)
 - **GraphRAG** — ground agent with relevant evidence/context
 - **User interface** — demonstrate investigation
 
 ### Chosen
-- **LangGraph (Python)** — state machine with tool use, conditional routing, persistence; Python chosen because TigerGraph MCP is Python-native
+- **LangGraph (Python)** — state machine with tool use, conditional routing, persistence; Python chosen because pyTigerGraph is Python-native
 - **Groq GPT-OSS-120B** — 131K context, structured outputs, tool use, fast inference (~500 tok/s), cheap ($0.15/$0.60 per 1M tokens)
 - **Jev / System One** — fast classification/scoring for structured decisions alongside generative model
 - **NestJS** — TypeScript backend, clean module/controller/service pattern for API
@@ -188,7 +188,7 @@ Everything else is external managed service.
 ```
 Frontend ←→ NestJS:        REST + SSE (investigation progress)
 NestJS  → Python Agent:    HTTP POST (trigger investigation, get results)
-Python Agent → TG MCP:     MCP protocol (stdio or streamable HTTP)
+Python Agent → pyTigerGraph: Direct HTTP requests to Savanna
 Python Agent → Groq:       OpenAI-compatible API
 Python Agent → Jev:        Jev SDK / API
 Python Agent → LangSmith:  Automatic via LangGraph callbacks

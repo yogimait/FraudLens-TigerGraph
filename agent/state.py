@@ -52,6 +52,10 @@ class InvestigationState(TypedDict):
     # Evidence list for output
     evidence: List[Dict[str, Any]]
 
+    # Graph visualization data for frontend
+    graph_nodes: List[Dict[str, Any]]
+    graph_edges: List[Dict[str, Any]]
+
     # Metadata
     stop_reason: str
     tool_calls: int
