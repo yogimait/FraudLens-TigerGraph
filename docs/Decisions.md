@@ -196,6 +196,30 @@
 
 **Rationale**: The user explicitly required a modern, premium design system. Leveraging `shadcn` components gives immediate access to professional styling. `lazy loading` and lightweight graph visualizations are prioritized to prevent dashboard lag over complex interactive 2D graph libraries.
 
+## D24. TigerGraph access via MCP server with pyTigerGraph fallback
+
+**Decision**: Route TigerGraph calls through the installed `tigergraph-mcp` server (spawned as a stdio subprocess via the `mcp` SDK, `agent/tg_mcp.py`), but treat it as an accelerator, not a dependency: every call falls back to a direct pyTigerGraph connection on any MCP failure, and the first failure permanently flips `use_mcp` off for the process.
+
+**Rationale**: The MCP server satisfies the challenge's integration goal and gives a uniform tool surface, but the stdio data path proved slow/flaky for query execution in practice (handshake and `list_tools` are reliable; tool calls occasionally time out or return unparseable payloads). pyTigerGraph is the proven path. Guarded fallback keeps the agent working offline (CI) and under Savanna auto-stop, at the cost of one wasted call when MCP dies.
+
+## D25. Local hash-based embeddings + DocChunk vertex for GraphRAG
+
+**Decision**: Embed the RAG corpus (7 pattern docs, policy rule chunks, closed-case analyst notes) with a deterministic pure-Python hash bag-of-words vector (256-dim TF, L2-normalized) — no external embeddings API. Primary indexing path stores chunks in a `DocChunk` vertex type (created at runtime via local schema-change job) with a 256-dim COSINE `embedding` vector attribute and an installed `rag_vector_search` helper query; retrieval falls back to in-memory cosine scoring over the cached corpus.
+
+**Rationale**: Groq has no embeddings API and no new dependencies are allowed; a hash TF vector is deterministic, dependency-free, and adequate for ranking a ~30-chunk corpus. TigerGraph vector attributes cannot be searched in interpreted mode (`vectorSearch()` requires an installed query with a `LIST<FLOAT>` parameter), and schema changes on Savanna are version-sensitive — hence the guarded attempt + in-memory fallback, which always works offline.
+
+## D26. Jev circuit breaker with engine labeling
+
+**Decision**: `agent/jev_client.py` makes real `typesafe-sdk` calls (pattern Choice, sufficiency Noul, coordination Noul in one `system_one` request) but trips a process-wide circuit breaker after the first Jev failure, switching to the deterministic graph heuristics and marking every result `"engine": "jev" | "heuristic"`.
+
+**Rationale**: The TypeSafe endpoint currently answers `402 no available credits`; without the breaker, every classification would pay a doomed API round-trip (plus retries) during benchmark runs. Explicit engine labeling keeps results honest — Jev confidence is a signal, never the verdict.
+
+## D?. No paid Jev credits; self-hosted Laya is the optional revival path
+
+**Decision**: Do not purchase TypeSafe Jev credits for the submission. The deterministic heuristic engine ships as the active decision layer. [Laya](https://huggingface.co/convaiinnovations/laya) (Apache-2.0, Jev-compatible HTTP server `laya-serve`, same `POST /v1/systemone` shape) may be self-hosted locally after the benchmark regeneration is secured — wired via a `JEV_BASE_URL` HTTP shim in [[Jev]], only if a side-by-side eval on our own case states beats the heuristics.
+
+**Rationale**: The Jev account showed ~130M input tokens consumed (MCP tool sessions + repeated benchmark runs), so paid credits risk another burn. Laya costs $0 and is API-compatible, but its card documents near-chance zero-shot typed-decision accuracy outside its fine-tuned domains and a `noul` label-following defect — both of our Noul call types (sufficiency, coordination) are exposed. Evaluation before adoption is mandatory; the policy engine and verdicts never depend on the decision layer either way.
+
 ## Cross-References
 
 - Open questions: [[Questions]]

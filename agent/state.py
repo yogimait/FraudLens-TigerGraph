@@ -1,31 +1,26 @@
 from typing import TypedDict, Optional, List, Dict, Any
 
-class InvestigationState(TypedDict):
+
+class InvestigationState(TypedDict, total=False):
     # Input
     case_id: str
-    case_data: Dict[str, Any]       # from case_pack.csv row
+    case_data: Dict[str, Any]       # case_pack.csv row (+ TransactionID)
     trigger_type: str               # risk_score | customer_report | analyst_request
 
     # Transaction & entity context
-    flagged_txn: Dict[str, Any]     # full transaction record
-    customer_history: List[Dict[str, Any]]
-    card_history: List[Dict[str, Any]]
-    device_profile: Optional[Dict[str, Any]]
-    related_cards: List[str]
+    flagged_txn: Dict[str, Any]
     related_txns: List[Dict[str, Any]]
 
     # Graph investigation results
-    graph_evidence: List[Dict[str, Any]]
-    connected_device_profiles: List[str]
     connected_card_ids: List[str]
-    billing_regions: List[Dict[str, Any]]
-    email_domains: List[Dict[str, Any]]
+    connected_device_profiles: List[str]
 
     # Historical memory
     similar_prior_cases: List[Dict[str, Any]]
 
     # Assessment
     jev_classification: Dict[str, Any]
+    confidence_drivers: List[str]
     fraud_probability: float
     pattern: str
     pattern_description: str
@@ -34,10 +29,11 @@ class InvestigationState(TypedDict):
     first_suspicious_txn_id: str
     exposure_usd: float
 
-    # Evidence requests
-    evidence_requests: List[Dict[str, Any]]
+    # Evidence
+    evidence: List[Dict[str, Any]]  # [{"claim","source","ref","entity_ids"}]
+    evidence_requests: List[Dict[str, Any]]  # [{"type","asked_after_step","assumed_response"}]
     evidence_request_count: int
-    assumed_responses: List[Dict[str, Any]]
+    customer_response: str          # "" | denied | confirmed | no_reply
 
     # Actions
     initial_actions: List[Dict[str, Any]]
@@ -46,19 +42,26 @@ class InvestigationState(TypedDict):
 
     # SAR
     sar_required: bool
+    sar_reason: str
     sar_narrative: str
     sar_subjects: List[str]
 
-    # Evidence list for output
-    evidence: List[Dict[str, Any]]
+    # Retrieval context
+    rag_context: List[Dict[str, Any]]
+
+    # Outputs
+    summary: str
+    stop_reason: str
+    written_to_graph: bool
+    graph_case_id: str
 
     # Graph visualization data for frontend
     graph_nodes: List[Dict[str, Any]]
     graph_edges: List[Dict[str, Any]]
 
     # Metadata
-    stop_reason: str
     tool_calls: int
     tokens: int
-    investigation_step: int
-    summary: str
+    llm_ok: bool                    # False when the LLM call failed (fallback assessment used)
+    latency_s: float
+    step: int

@@ -1,0 +1,226 @@
+{
+  "case_id": "HHG-002",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.78,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3478782"
+    ],
+    "first_suspicious_txn_id": "3478782",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 292.36,
+    "evidence": [
+      {
+        "claim": "Card 18586 has 2 transactions on record; most recent amounts [37.95, 292.36]",
+        "source": "graph",
+        "ref": "get_card_transactions",
+        "entity_ids": [
+          "18586"
+        ]
+      },
+      {
+        "claim": "Customer C11891 also holds cards ['18586_0']",
+        "source": "graph",
+        "ref": "get_customer_cards",
+        "entity_ids": [
+          "18586_0"
+        ]
+      },
+      {
+        "claim": "No pattern: the evidence does not support a known fraud typology. The activity may still be unusual, but neither graph evidence nor history matches card testing, card-not-present fraud, out-of-region use, account takeover, or coordinated ab",
+        "source": "document",
+        "ref": "pattern:none",
+        "entity_ids": []
+      },
+      {
+        "claim": "Card-not-present fraud from a new device is the same online fraud pattern, with the identity record marking the device as New for the account, sometimes behind a proxy. It is stronger evidence than plain card-not-present fraud but still not",
+        "source": "document",
+        "ref": "pattern:card_not_present_new_device",
+        "entity_ids": []
+      },
+      {
+        "claim": "| Route | Applies to |\n|---|---|\n| `auto` | `ALLOW_TRANSACTION`, `MONITOR_CARD`, `MONITOR_CONNECTED_CARDS`, `WARN_CUSTOMER`, `VERIFY_WITH_CUSTOMER`, `STEP_UP_AUTH`, `GENERATE_REPORT`, `CREATE_CASE`, `ESCALATE_TO_ANALYST`, `CLOSE_NO_FRAUD` |",
+        "source": "document",
+        "ref": "policy:2",
+        "entity_ids": []
+      },
+      {
+        "claim": "Customer denied when asked to validate the flagged transaction",
+        "source": "customer",
+        "ref": "evidence_request:1",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-4160",
+      "CC-5202",
+      "CC-5484"
+    ],
+    "summary": "The investigation of case HHG-002 was triggered by a card‑not‑present fraud pattern with a 0.78 probability and $292.36 exposure. Graph evidence showed card 18586 had two recent transactions of $37.95 and $292.36, and the associated customer C11891 held the card. The customer denied the flagged transaction when asked to validate it, confirming unauthorized use. Based on this denial, the system executed a block on the card (L1) and automatically created a fraud case. The final verdict was fraud, and the appropriate actions were taken.",
+    "written_to_graph": true,
+    "graph_case_id": "HHG-002"
+  },
+  "evidence_requests": [
+    {
+      "type": "step_up_auth",
+      "asked_after_step": 6,
+      "assumed_response": "Simulated response recorded: denied. Assumed the customer replies within 24 hours; a confirmation closes the case as legitimate, a denial raises the probability and triggers the block path under R2, silence keeps the card under monitoring per R4."
+    }
+  ],
+  "sar": {
+    "file": false,
+    "reason": "R3a: no filing trigger met (verdict fraud, exposure $292.36, documented pattern)",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: fraud confirmed at probability 0.79; exposure $0.00"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: strong evidence of unauthorized use"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denied the transaction; exposure $292.36"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: customer denial confirms unauthorized use"
+      }
+    ],
+    "what_changed": "nothing"
+  },
+  "stop_reason": "The investigation stopped because the customer's verification response resolved the issue per policy section 6.",
+  "tool_calls": 8,
+  "tokens": 6357,
+  "latency_s": 48.9,
+  "graph_data": {
+    "nodes": [
+      {
+        "id": "txn-3478782",
+        "type": "transaction",
+        "label": "Txn 3478782",
+        "data": {
+          "amount": 292.36,
+          "risk_score": 0.79
+        }
+      },
+      {
+        "id": "card-18586",
+        "type": "card",
+        "label": "Card 18586",
+        "data": {}
+      },
+      {
+        "id": "txn-3073868",
+        "type": "transaction",
+        "label": "Txn 3073868",
+        "data": {
+          "amount": 37.95,
+          "ts": "2026-01-19 19:23:39"
+        }
+      },
+      {
+        "id": "case-HHG-002",
+        "type": "case",
+        "label": "Case HHG-002",
+        "data": {}
+      },
+      {
+        "id": "cc-CC-4160",
+        "type": "closed_case",
+        "label": "CC-4160",
+        "data": {
+          "verdict": "confirmed_fraud",
+          "pattern": "card_not_present_fraud",
+          "similarity": 0.899
+        }
+      },
+      {
+        "id": "cc-CC-5202",
+        "type": "closed_case",
+        "label": "CC-5202",
+        "data": {
+          "verdict": "confirmed_fraud",
+          "pattern": "card_not_present_fraud",
+          "similarity": 0.7
+        }
+      },
+      {
+        "id": "cc-CC-5484",
+        "type": "closed_case",
+        "label": "CC-5484",
+        "data": {
+          "verdict": "confirmed_fraud",
+          "pattern": "card_not_present_fraud",
+          "similarity": 0.7
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "card-18586",
+        "target": "txn-3478782",
+        "label": "MADE"
+      },
+      {
+        "source": "card-18586",
+        "target": "txn-3073868",
+        "label": "MADE"
+      },
+      {
+        "source": "case-HHG-002",
+        "target": "txn-3478782",
+        "label": "INVOLVES"
+      },
+      {
+        "source": "case-HHG-002",
+        "target": "cc-CC-4160",
+        "label": "SIMILAR_TO"
+      },
+      {
+        "source": "case-HHG-002",
+        "target": "cc-CC-5202",
+        "label": "SIMILAR_TO"
+      },
+      {
+        "source": "case-HHG-002",
+        "target": "cc-CC-5484",
+        "label": "SIMILAR_TO"
+      }
+    ]
+  },
+  "metadata": {
+    "duration_seconds": 48.9,
+    "jev_classification": {
+      "engine": "heuristic",
+      "status": "error",
+      "pattern": "card_not_present_fraud",
+      "pattern_label": "Card-Not-Present Fraud",
+      "jev_pattern": "Card-Not-Present Fraud",
+      "confidence": 0.55,
+      "jev_confidence": 0.55,
+      "probabilities": {},
+      "sufficiency": 0.9,
+      "coordination": 0.2
+    },
+    "llm_ok": true,
+    "generated_at": "2026-09-23T18:14:30Z"
+  }
+}

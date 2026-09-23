@@ -9,6 +9,4 @@ __pycache__/
 venv/
 
 # User requested exclusions
-tigergraph/
 Initial-docs/
-cases/

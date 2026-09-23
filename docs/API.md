@@ -12,6 +12,11 @@ Python  → TigerGraph MCP:   MCP protocol
 
 ## NestJS REST API (Frontend ↔ Backend)
 
+### Health
+
+#### `GET /health`
+Returns `{ "status": "ok", "uptime": <seconds> }`. Replaces the former hello-world root endpoint.
+
 ### Cases
 
 #### `GET /api/cases`
@@ -160,18 +165,35 @@ Check investigation status (for async processing).
   "_id": "6ab198ebadfe...",
   "case_id": "CASE_2987000",
   "transaction_id": "2987000",
-  "status": "awaiting_approval",
+  "status": "awaiting_approval | closed | failed | ...",
   "trigger_type": "risk_score",
   "fraud_probability": 0.3,
-  "pattern": "None",
+  "pattern": "none",
+  "pattern_description": "...",
   "verdict": "uncertain",
   "exposure_usd": 0,
   "affected_txn_ids": ["2987000"],
-  "sar": { "file": false, "narrative": "", "subjects": [] },
+  "first_suspicious_txn_id": "2987000",
+  "connected_card_ids": [],
+  "connected_device_profiles": [],
+  "evidence": [
+    { "claim": "...", "source": "graph|document|customer|external", "ref": "query_name", "entity_ids": ["..."] }
+  ],
+  "evidence_requests": [
+    { "type": "...", "asked_after_step": 3, "assumed_response": "..." }
+  ],
+  "similar_prior_cases": ["CASE_123"],
+  "written_to_graph": true,
+  "graph_case_id": "case_2987000",
+  "sar": { "file": false, "reason": "", "narrative": "", "subjects": [], "total_amount_usd": 0, "activity_dates": [] },
   "next_best_actions": {
-    "initial": [],
-    "final": [{ "action": "REQUIRE_L1_APPROVAL", "reason": "..." }]
+    "initial": [{ "action": "CREATE_CASE", "route": "auto", "reason": "..." }],
+    "final": [{ "action": "VERIFY_WITH_CUSTOMER", "route": "auto", "reason": "..." }],
+    "what_changed": "..."
   },
+  "tool_calls": 9,
+  "tokens": 12480,
+  "latency_s": 18.7,
   "approval_status": {
     "decision": "approved",
     "level": "L1",
@@ -180,6 +202,18 @@ Check investigation status (for async processing).
   }
 }
 ```
+
+#### Approval level validation (`requiredApprovalLevel`)
+
+`POST /cases/:id/approve` and `/reject` validate the submitted `level`:
+
+- `level` must be `"L1"` or `"L2"` (400 otherwise).
+- Required level is derived from final actions: **L2** if final actions include `FILE_REPORT` or `BLOCK_ALL_CARDS`, or `BLOCK_CARD` with `exposure_usd > 2500`; else **L1** if any final action is routed `L1`; else none.
+- A submitted level lower than required → `409 Conflict`. Higher or equal is accepted.
+- Cases with no required level close automatically after investigation; only `auto`-routed actions execute.
+
+#### `GET /cases/stats`
+Returns `total, open, awaiting_approval, closed, closed_fraud, closed_legitimate, uncertain, sars_generated, escalated`. `uncertain` counts cases with verdict `uncertain` (a valid verdict). `escalated` counts cases whose required approval level is L1 or L2.
 
 ### `approvals`
 ```json

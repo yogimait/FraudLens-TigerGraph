@@ -18,10 +18,11 @@ graph LR
     CC["ClosedCase"] -->|INVOLVES| T
     CC -->|ON_CARD| K
     CC -->|CONNECTED_TO| K
-    IC["InvestigationCase"] -->|INVOLVES| T
-    IC -->|ON_CARD| K
-    IC -->|CONNECTED_TO| K
+    IC["InvestigationCase"] -->|INV_INVOLVES| T
+    IC -->|INV_ON_CARD| K
+    IC -->|INV_CONNECTED_TO| K
     IC -->|SIMILAR_TO| CC
+    DC["DocChunk (RAG)"]
 ```
 
 ## Vertices
@@ -115,6 +116,18 @@ graph LR
 | `summary` | STRING | |
 | `created_at` | DATETIME | |
 
+**Write-back (implemented in `agent/memory.py`)**: `persist_investigation_case` upserts the vertex with `status` ∈ `open`/`closed`, `verdict`, `fraud_probability`, `pattern`, `exposure_usd`, `summary`, `created_at` (UTC), then wires `INV_INVOLVES` (flagged txn), `INV_ON_CARD` + `INV_CONNECTED_TO` (connected card ids) and `SIMILAR_TO` (prior `ClosedCase` ids verified to exist). Uses `conn.upsertVertex`/`conn.upsertEdge`; any failure logs a warning and returns `""`.
+
+### DocChunk (GraphRAG, agent-created)
+| Attribute | Type | Source |
+|---|---|---|
+| `chunk_id` (PRIMARY ID) | STRING | Sanitized `ref`, e.g. `pattern__card_testing` |
+| `ref` | STRING | `pattern:<id>`, `policy:R5`, `closed_case:CC-0141` |
+| `content` | STRING | Pattern typology / policy rule / analyst note text |
+| `embedding` | VECTOR<FLOAT>, 256 dims, COSINE | Local hash bag-of-words embedding (see [[TigerGraph]]) |
+
+`DocChunk` is added to the graph at runtime by `agent/rag.py` via a local schema-change job (not part of `tigergraph/schema.gsql`), together with the installed `rag_vector_search` helper query.
+
 ## Edges
 
 | Edge | From | To | Attributes | Cardinality |
@@ -129,9 +142,9 @@ graph LR
 | `INVOLVES` | ClosedCase | Transaction | — | 1:N |
 | `ON_CARD` | ClosedCase | Card | — | 1:1 |
 | `CONNECTED_TO` | ClosedCase | Card | — | 1:N |
-| `INVOLVES` | InvestigationCase | Transaction | — | 1:N |
-| `ON_CARD` | InvestigationCase | Card | — | 1:1 |
-| `CONNECTED_TO` | InvestigationCase | Card | — | 1:N |
+| `INV_INVOLVES` | InvestigationCase | Transaction | — | 1:N |
+| `INV_ON_CARD` | InvestigationCase | Card | — | 1:1 |
+| `INV_CONNECTED_TO` | InvestigationCase | Card | — | 1:N |
 | `SIMILAR_TO` | InvestigationCase | ClosedCase | — | N:N |
 
 ## Data Loading Plan

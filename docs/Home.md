@@ -22,6 +22,8 @@
 | [[Decisions]] | Architectural decisions and rationale |
 | [[Questions]] | Open questions requiring resolution |
 | [[Plan-Validation]] | Consistency check and risk assessment |
+| [[Audit]] | Full project audit vs problem statement (2026-09-23) |
+| [[Demo-Video]] | 3–5 min demo video script (judging-aligned) |
 
 ## Architecture Overview
 

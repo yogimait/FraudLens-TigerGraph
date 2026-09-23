@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 export default function GraphExplorerPage() {
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
+  const [counts, setCounts] = useState({ nodes: 0, edges: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,8 +34,14 @@ export default function GraphExplorerPage() {
         // Deduplicate nodes
         const uniqueNodes = Array.from(new Map(allNodes.map(item => [item.id, item])).values());
 
+        // Deduplicate edges shared between cases (same pair + label)
+        const uniqueEdges = Array.from(
+          new Map(allEdges.map(item => [`${item.source}|${item.target}|${item.label ?? ''}`, item])).values()
+        );
+
         setNodes(uniqueNodes);
-        setEdges(allEdges);
+        setEdges(uniqueEdges);
+        setCounts({ nodes: uniqueNodes.length, edges: uniqueEdges.length });
       } catch (e) {
         console.error(e);
       } finally {
@@ -50,7 +57,9 @@ export default function GraphExplorerPage() {
 
       <div className="relative z-10">
         <h1 className="text-3xl font-serif font-extrabold tracking-tight text-foreground">Graph Explorer</h1>
-        <p className="text-sm text-muted-foreground mt-1">Global view of the TigerGraph fraud network.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Global view of the TigerGraph fraud network — {counts.nodes} nodes, {counts.edges} relationships.
+        </p>
       </div>
       
       <Card className="p-1 border-border shadow-none bg-card h-[700px] relative z-10 overflow-hidden">

@@ -6,7 +6,34 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, CheckCircle2, XCircle, AlertCircle, ArrowRight, UserCog, Loader2 } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, XCircle, ArrowRight, UserCog, Loader2 } from 'lucide-react';
+
+const L2_ACTIONS = ['FILE_REPORT', 'BLOCK_ALL_CARDS'];
+
+function requiredApprovalLevel(c: any): 'L1' | 'L2' | null {
+  const actions: any[] = c.next_best_actions?.final || [];
+  if (!actions.length) return null;
+  const names = actions.map((a: any) => a.action);
+  const exposure = c.exposure_usd || 0;
+  const isL2 = names.some((n: string) => L2_ACTIONS.includes(n)) || (names.includes('BLOCK_CARD') && exposure > 2500);
+  if (isL2) return 'L2';
+  if (actions.some((a: any) => a.route === 'L1')) return 'L1';
+  return null;
+}
+
+function RouteBadge({ route }: { route?: string }) {
+  const cfg: Record<string, { label: string; cls: string }> = {
+    auto: { label: 'AUTO', cls: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' },
+    L1: { label: 'L1', cls: 'bg-amber-500/15 text-amber-500 border-amber-500/30' },
+    L2: { label: 'L2', cls: 'bg-destructive/15 text-destructive border-destructive/30' },
+  };
+  const c = (route && cfg[route]) || cfg.auto;
+  return (
+    <Badge variant="outline" className={`text-[10px] font-bold tracking-wider ${c.cls}`}>
+      {c.label}
+    </Badge>
+  );
+}
 
 export default function ApprovalsPage() {
   const router = useRouter();
@@ -15,6 +42,7 @@ export default function ApprovalsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [analystNote, setAnalystNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const fetchApprovals = async () => {
     try {
@@ -37,18 +65,21 @@ export default function ApprovalsPage() {
 
   const handleAction = async (actionType: 'approve' | 'reject') => {
     if (!selectedCaseId) return;
+    const selected = cases.find(c => c.case_id === selectedCaseId);
+    if (!selected) return;
     setActionLoading(true);
+    setError(null);
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/cases/${selectedCaseId}/${actionType}`, {
-        level: 'L1',
+        level: requiredApprovalLevel(selected) || 'L1',
         reason: analystNote || `Manually ${actionType}d by analyst`
       });
       setAnalystNote('');
-      
+
       const currentIndex = cases.findIndex(c => c.case_id === selectedCaseId);
       const remainingCases = cases.filter(c => c.case_id !== selectedCaseId);
       setCases(remainingCases);
-      
+
       if (remainingCases.length > 0) {
         const nextIndex = currentIndex < remainingCases.length ? currentIndex : remainingCases.length - 1;
         setSelectedCaseId(remainingCases[nextIndex].case_id);
@@ -57,9 +88,9 @@ export default function ApprovalsPage() {
       }
 
       await fetchApprovals();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert(`Action failed: ${e}`);
+      setError(e?.response?.data?.message || `Action failed: ${e?.message || e}`);
     } finally {
       setActionLoading(false);
     }
@@ -80,25 +111,27 @@ export default function ApprovalsPage() {
           {cases.length} Pending Review
         </Badge>
       </div>
-      
+
       <div className="flex-1 flex gap-6 min-h-0 relative z-10 w-full overflow-hidden">
         {/* Left Pane - Queue */}
         <div className="w-1/3 shrink-0 min-w-[320px] flex flex-col gap-4 overflow-y-auto pr-2 pb-8">
           {loading ? (
             <div className="text-muted-foreground p-4">Loading queue...</div>
           ) : cases.length === 0 ? (
-            <div className="text-muted-foreground p-4 bg-card border border-border rounded-lg text-center">
-              No pending approvals.
+            <div className="text-muted-foreground p-8 bg-card border border-border rounded-lg text-center space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+              <p className="font-bold text-foreground">Nothing awaiting approval</p>
+              <p className="text-sm">All auto-routed actions were executed by the agent. Cases requiring L1/L2 sign-off will appear here.</p>
             </div>
           ) : cases.map((item) => {
             const prob = item.fraud_probability || 0;
             const isHighRisk = prob > 0.7;
             const riskLabel = isHighRisk ? "High Risk" : (prob > 0.4 ? "Medium Risk" : "Low Risk");
-            const reqLabel = item.next_best_actions?.final?.find((a:any) => a.action.includes('APPROVAL'))?.action || 'L1_APPROVAL';
+            const reqLevel = requiredApprovalLevel(item) || 'L1';
 
             return (
-              <Card 
-                key={item.case_id} 
+              <Card
+                key={item.case_id}
                 className={`cursor-pointer transition-all shadow-none ${selectedCaseId === item.case_id ? 'border-primary ring-1 ring-primary bg-primary/5' : 'border-border bg-card hover:border-primary/50'}`}
                 onClick={() => setSelectedCaseId(item.case_id)}
               >
@@ -113,8 +146,8 @@ export default function ApprovalsPage() {
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Pattern</span><span className="font-medium text-foreground">{item.pattern || 'Unknown'}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Exposure</span><span className="font-medium text-foreground font-mono">${(item.exposure_usd || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>
                   </div>
-                  <div className="flex items-center text-xs font-bold text-purple-400 bg-purple-500/10 rounded px-2 py-1 w-fit border border-purple-500/20">
-                    <UserCog className="w-3 h-3 mr-1" /> {reqLabel.replace('REQUIRE_', '')}
+                  <div className={`flex items-center text-xs font-bold rounded px-2 py-1 w-fit border ${reqLevel === 'L2' ? 'text-destructive bg-destructive/10 border-destructive/20' : 'text-amber-500 bg-amber-500/10 border-amber-500/20'}`}>
+                    <UserCog className="w-3 h-3 mr-1" /> {reqLevel} approval required
                   </div>
                 </CardContent>
               </Card>
@@ -129,30 +162,39 @@ export default function ApprovalsPage() {
               <div className="p-6 border-b border-border bg-secondary/50 flex justify-between items-center shrink-0">
                 <div>
                   <h2 className="text-xl font-serif font-bold text-foreground">{selectedCase.case_id}</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Escalated by Agent: Requires Manual Intervention</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Escalated by Agent: Requires {requiredApprovalLevel(selectedCase) || 'L1'} Manual Sign-off
+                  </p>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="text-primary bg-transparent border-primary/50 hover:bg-primary/10"
                   onClick={() => router.push(`/cases/${selectedCase.case_id}`)}
                 >
                   View Full Case <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
-              
+
               <div className="p-6 flex-1 overflow-y-auto space-y-6">
                 <div>
                   <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Proposed Final Actions</h3>
                   <div className="bg-secondary/30 border border-border rounded-lg p-4 flex items-start gap-3 w-full">
                     <ShieldAlert className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                     <div className="space-y-2 w-full min-w-0">
-                      {selectedCase.next_best_actions?.final?.map((act: any, i: number) => (
-                        <div key={i}>
-                          <p className="font-bold text-foreground font-mono truncate">{act.action}</p>
-                          <p className="text-sm text-muted-foreground mt-1 break-words whitespace-pre-wrap">{act.reason}</p>
-                        </div>
-                      ))}
+                      {selectedCase.next_best_actions?.final?.length > 0 ? (
+                        selectedCase.next_best_actions.final.map((act: any, i: number) => (
+                          <div key={i}>
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-foreground font-mono truncate">{act.action}</p>
+                              <RouteBadge route={act.route} />
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1 break-words whitespace-pre-wrap">{act.reason}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No final actions recorded.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -167,18 +209,24 @@ export default function ApprovalsPage() {
 
                 <div>
                   <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Analyst Notes</h3>
-                  <textarea 
-                    className="w-full h-32 p-3 border border-border rounded-lg text-sm bg-input text-foreground focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/50 transition-colors" 
+                  <textarea
+                    className="w-full h-32 p-3 border border-border rounded-lg text-sm bg-input text-foreground focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground/50 transition-colors"
                     placeholder="Add your justification for approval or rejection here..."
                     value={analystNote}
                     onChange={(e) => setAnalystNote(e.target.value)}
                   ></textarea>
                 </div>
               </div>
-              
+
+              {error && (
+                <div className="px-6 py-3 bg-destructive/10 border-t border-destructive/20 text-sm text-destructive shrink-0">
+                  {error}
+                </div>
+              )}
+
               <div className="p-6 border-t border-border bg-secondary/30 flex justify-end gap-3 shrink-0">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="border-destructive/30 text-destructive bg-transparent hover:bg-destructive/10"
                   onClick={() => handleAction('reject')}
                   disabled={actionLoading}
@@ -186,7 +234,7 @@ export default function ApprovalsPage() {
                   {actionLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
                   Reject Action
                 </Button>
-                <Button 
+                <Button
                   className="bg-emerald-600 hover:bg-emerald-700 text-white"
                   onClick={() => handleAction('approve')}
                   disabled={actionLoading}
@@ -198,7 +246,7 @@ export default function ApprovalsPage() {
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground font-medium">
-              Select a case from the queue to review.
+              {loading ? 'Loading...' : 'Select a case from the queue to review.'}
             </div>
           )}
         </div>

@@ -1,7 +1,13 @@
 import os
 from typesafe_sdk import TypeSafeClient, Noul
 
-api_key = "apikey_21904c41935973b7403595d40111cba6fc15_52c18b6b0f806631aae83e7232801a0954b65fa935e9a0a49e28afe6d33e313e"
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key = os.environ.get("JEV_API_KEY", "")
+if not api_key:
+    raise SystemExit("JEV_API_KEY not set")
 
 print("Testing Jev API connection...")
 

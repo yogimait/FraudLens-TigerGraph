@@ -177,3 +177,27 @@ Respect the separation of concerns defined in `docs/Architecture.md`:
 - **Python agent** orchestrates the investigation (LangGraph state machine)
 
 Do NOT let one component do another's job.
+---
+
+## 12. Continuous Docs Sync (Mandatory After Every Change)
+
+After **every** change or edit in the project � code, config, scripts, schemas, or derived artifacts � update the relevant file(s) in docs/ in the same task, before finishing.
+
+- The docs/ folder is the Obsidian vault and the progress tracker; it must always reflect the current state of the code.
+- Update the specific doc that owns the changed area ([[Architecture]], [[Agent-Workflow]], [[Policy-Engine]], [[API]], [[UI]], [[Data-Model]], [[TigerGraph]], [[Jev]], [[Development-Plan]], [[Implementation-Tasks]], [[Decisions]]) � not just a changelog note.
+- Mark task/phase status in [[Implementation-Tasks]] the moment work starts or finishes; keep status markers accurate, never aspirational.
+- Docs describe what IS implemented, not what is planned; planned features stay in the plan docs, and drift between code and docs is a defect.
+- Cross-link related docs with wiki links so the vault stays navigable.
+
+---
+
+## 13. DevVault — Cross-Project Hub (copy-pasteable to any project)
+
+The central hub vault `C:\Users\Hp\Obsidian\DevVault` indexes all projects so agents can discover and reuse prior work across projects.
+
+- Every project gets a hub note `DevVault/Projects/<ProjectName>.md`, created on first meaningful work. Contents: what the project is, repo location, docs path (`<project>/docs/`), status, key facts (stack, entry points, ports, rules files), and a **Reusable components** section naming concrete reusable pieces (file + what it does + why reusable), written with keyword-rich descriptions so agents can find them.
+- Keep `DevVault/Home.md` in sync: one row per project in the Projects table (wiki link, location, docs path, status).
+- Concepts shared across projects get their own top-level DevVault note (e.g., `Simulation-Model.md`), linked from every hub note that uses them.
+- Agent discovery order: DevVault `Home.md` → project hub note → project `docs/` → code. Before building anything non-trivial, check hub notes (especially Reusable components sections) for an existing implementation; reuse instead of rebuild.
+- When a project gains a genuinely reusable component, add it to the hub note's Reusable components section in the same task.
+- Link, don't copy: DevVault holds hub notes and shared concepts, never full project docs. Wiki links connect; duplication drifts.

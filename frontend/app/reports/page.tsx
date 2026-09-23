@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Filter, FileText, CheckCircle2 } from 'lucide-react';
+import { Download, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function ReportsPage() {
   const router = useRouter();
@@ -41,6 +41,19 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportAll = () => {
+    const text = sars.map(caseData =>
+      `SUSPICIOUS ACTIVITY REPORT (SAR)\n================================\nCase ID: ${caseData.case_id}\nDate: ${new Date(caseData.updatedAt).toISOString()}\nExposure: $${caseData.exposure_usd}\nPattern: ${caseData.pattern}\n\nNARRATIVE:\n${caseData.sar.narrative}\n`
+    ).join('\n\n----------------------------------------\n\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SAR_Export_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex-1 p-8 space-y-8 bg-background relative min-h-screen">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1E2433_1px,transparent_1px),linear-gradient(to_bottom,#1E2433_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none"></div>
@@ -51,8 +64,9 @@ export default function ReportsPage() {
           <p className="text-sm text-muted-foreground mt-1">Manage exported SARs and compliance logs.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="text-foreground bg-card border-border shadow-none hover:bg-secondary"><Filter className="w-4 h-4 mr-2" /> Filter</Button>
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-none"><Download className="w-4 h-4 mr-2" /> Export All</Button>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-none" onClick={handleExportAll} disabled={sars.length === 0}>
+            <Download className="w-4 h-4 mr-2" /> Export All ({sars.length})
+          </Button>
         </div>
       </div>
       

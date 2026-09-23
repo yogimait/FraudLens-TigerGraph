@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Investigations', href: '/cases', icon: Target },
-  { name: 'Case Memory', href: '/memory', icon: Database },
+  { name: 'Archive', href: '/memory', icon: Database },
   { name: 'Graph Explorer', href: '/graph', icon: Network },
   { name: 'Analytics', href: '/analytics', icon: LineChart },
   { name: 'Reports', href: '/reports', icon: FileText },
@@ -113,23 +113,16 @@ export function Sidebar() {
 
         <div className={cn("flex items-center px-4 py-2", isCollapsed ? "justify-center" : "space-x-3")}>
           <div className="w-9 h-9 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-foreground font-medium shrink-0 border border-sidebar-border relative">
-            ER
+            AN
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary border-2 border-sidebar rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <p className="text-sm font-bold text-foreground truncate">Elena Rostova</p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">Lead Investigator</p>
+              <p className="text-sm font-bold text-foreground truncate">Analyst</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">Fraud Investigation</p>
             </div>
           )}
         </div>
-        {!isCollapsed && (
-          <div className="pt-4 border-t border-sidebar-border/50">
-            <p className="text-xs italic text-muted-foreground/70 font-serif leading-relaxed">
-              "Smarter investigations<br/>for a safer financial world."
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,0 +1,3670 @@
+{
+  "case_id": "HHG-019",
+  "case": {
+    "status": "closed_legitimate",
+    "verdict": "legitimate",
+    "fraud_probability": 0.1,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "",
+    "connected_card_ids": [],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Card 11539_0 has 248 transactions on record; most recent amounts [100.06, 249.99, 108.0, 335.04, 59.09]",
+        "source": "graph",
+        "ref": "get_card_transactions",
+        "entity_ids": [
+          "11539_0"
+        ]
+      },
+      {
+        "claim": "| Route | Applies to |\n|---|---|\n| `auto` | `ALLOW_TRANSACTION`, `MONITOR_CARD`, `MONITOR_CONNECTED_CARDS`, `WARN_CUSTOMER`, `VERIFY_WITH_CUSTOMER`, `STEP_UP_AUTH`, `GENERATE_REPORT`, `CREATE_CASE`, `ESCALATE_TO_ANALYST`, `CLOSE_NO_FRAUD` |",
+        "source": "document",
+        "ref": "policy:2",
+        "entity_ids": []
+      },
+      {
+        "claim": "Undocumented abuse is coordinated or repeated fraudulent activity that fits none of the five known patterns, for example many cards sharing one device profile, region, or recipient email in a single window. Policy R9: describe the pattern i",
+        "source": "document",
+        "ref": "pattern:undocumented",
+        "entity_ids": []
+      },
+      {
+        "claim": "**R1. Verify before you block on a weak signal.** If the case rests on a single signal (including a risk score alone) and your assessed fraud probability is below 0.70, recommend `VERIFY_WITH_CUSTOMER` or `STEP_UP_AUTH` before any block. Bl",
+        "source": "document",
+        "ref": "policy:3",
+        "entity_ids": []
+      },
+      {
+        "claim": "Customer confirmed when asked to validate the flagged transaction",
+        "source": "customer",
+        "ref": "evidence_request:1",
+        "entity_ids": []
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-2971",
+      "CC-3035",
+      "CC-2985"
+    ],
+    "summary": "The case was initially triggered by an automated block and case creation due to a high-risk signal suggesting possible fraud. Review of the card's transaction history showed the activity was consistent with the cardholder's normal behavior, and a customer verification request confirmed the flagged transaction as legitimate. Based on the low fraud probability (0.1) and the customer's confirmation, the verdict was legitimate, leading to actions that allowed the transaction, generated a report, and closed the case without fraud.",
+    "written_to_graph": true,
+    "graph_case_id": "HHG-019"
+  },
+  "evidence_requests": [
+    {
+      "type": "step_up_auth",
+      "asked_after_step": 6,
+      "assumed_response": "Simulated response recorded: confirmed. Assumed the customer replies within 24 hours; a confirmation closes the case as legitimate, a denial raises the probability and triggers the block path under R2, silence keeps the card under monitoring per R4."
+    }
+  ],
+  "sar": {
+    "file": false,
+    "reason": "R3a: no filing trigger met (verdict legitimate, exposure $0.00, documented pattern)",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0,
+    "activity_dates": []
+  },
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: fraud confirmed at probability 0.90; exposure $0.00"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: strong evidence of unauthorized use"
+      }
+    ],
+    "final": [
+      {
+        "action": "ALLOW_TRANSACTION",
+        "route": "auto",
+        "reason": "R1: activity is consistent with the cardholder's history"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R3a: evidence was requested"
+      },
+      {
+        "action": "GENERATE_REPORT",
+        "route": "auto",
+        "reason": "R3a: no case required, investigation recorded internally"
+      },
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: no fraud evidence after review"
+      }
+    ],
+    "what_changed": "Final adds ALLOW_TRANSACTION, CLOSE_NO_FRAUD, GENERATE_REPORT; drops BLOCK_CARD after the step_up_auth response."
+  },
+  "stop_reason": "The investigation stopped after the customer confirmed the transaction, which resolved the fraud concern.",
+  "tool_calls": 8,
+  "tokens": 11305,
+  "latency_s": 49.45,
+  "graph_data": {
+    "nodes": [
+      {
+        "id": "txn-3503878",
+        "type": "transaction",
+        "label": "Txn 3503878",
+        "data": {
+          "amount": 99.92,
+          "risk_score": 0.9
+        }
+      },
+      {
+        "id": "card-11539_0",
+        "type": "card",
+        "label": "Card 11539_0",
+        "data": {}
+      },
+      {
+        "id": "txn-3030290",
+        "type": "transaction",
+        "label": "Txn 3030290",
+        "data": {
+          "amount": 100.06,
+          "ts": "2026-01-09 19:40:40"
+        }
+      },
+      {
+        "id": "txn-3100333",
+        "type": "transaction",
+        "label": "Txn 3100333",
+        "data": {
+          "amount": 249.99,
+          "ts": "2026-01-24 14:37:47"
+        }
+      },
+      {
+        "id": "txn-3184679",
+        "type": "transaction",
+        "label": "Txn 3184679",
+        "data": {
+          "amount": 108.0,
+          "ts": "2026-02-17 08:15:16"
+        }
+      },
+      {
+        "id": "txn-3214886",
+        "type": "transaction",
+        "label": "Txn 3214886",
+        "data": {
+          "amount": 335.04,
+          "ts": "2026-02-27 21:34:28"
+        }
+      },
+      {
+        "id": "txn-3209424",
+        "type": "transaction",
+        "label": "Txn 3209424",
+        "data": {
+          "amount": 59.09,
+          "ts": "2026-02-25 22:44:11"
+        }
+      },
+      {
+        "id": "txn-3429104",
+        "type": "transaction",
+        "label": "Txn 3429104",
+        "data": {
+          "amount": 49.91,
+          "ts": "2026-05-06 15:07:02"
+        }
+      },
+      {
+        "id": "txn-3495125",
+        "type": "transaction",
+        "label": "Txn 3495125",
+        "data": {
+          "amount": 311.95,
+          "ts": "2026-05-30 18:41:14"
+        }
+      },
+      {
+        "id": "txn-3103012",
+        "type": "transaction",
+        "label": "Txn 3103012",
+        "data": {
+          "amount": 49.95,
+          "ts": "2026-01-24 21:30:51"
+        }
+      },
+      {
+        "id": "txn-3101852",
+        "type": "transaction",
+        "label": "Txn 3101852",
+        "data": {
+          "amount": 49.93,
+          "ts": "2026-01-24 18:38:00"
+        }
+      },
+      {
+        "id": "txn-3104707",
+        "type": "transaction",
+        "label": "Txn 3104707",
+        "data": {
+          "amount": 30.01,
+          "ts": "2026-01-25 03:06:37"
+        }
+      },
+      {
+        "id": "txn-3254724",
+        "type": "transaction",
+        "label": "Txn 3254724",
+        "data": {
+          "amount": 312.01,
+          "ts": "2026-03-12 16:35:48"
+        }
+      },
+      {
+        "id": "txn-3330361",
+        "type": "transaction",
+        "label": "Txn 3330361",
+        "data": {
+          "amount": 196.97,
+          "ts": "2026-04-05 05:33:54"
+        }
+      },
+      {
+        "id": "txn-3370737",
+        "type": "transaction",
+        "label": "Txn 3370737",
+        "data": {
+          "amount": 34.08,
+          "ts": "2026-04-17 20:47:57"
+        }
+      },
+      {
+        "id": "txn-3512695",
+        "type": "transaction",
+        "label": "Txn 3512695",
+        "data": {
+          "amount": 35.95,
+          "ts": "2026-06-05 12:55:55"
+        }
+      },
+      {
+        "id": "txn-3521616",
+        "type": "transaction",
+        "label": "Txn 3521616",
+        "data": {
+          "amount": 100.05,
+          "ts": "2026-06-08 11:56:50"
+        }
+      },
+      {
+        "id": "txn-3568651",
+        "type": "transaction",
+        "label": "Txn 3568651",
+        "data": {
+          "amount": 723.96,
+          "ts": "2026-06-24 15:56:07"
+        }
+      },
+      {
+        "id": "txn-3564124",
+        "type": "transaction",
+        "label": "Txn 3564124",
+        "data": {
+          "amount": 35.94,
+          "ts": "2026-06-22 22:52:42"
+        }
+      },
+      {
+        "id": "txn-3015182",
+        "type": "transaction",
+        "label": "Txn 3015182",
+        "data": {
+          "amount": 526.95,
+          "ts": "2026-01-05 19:10:03"
+        }
+      },
+      {
+        "id": "txn-3006178",
+        "type": "transaction",
+        "label": "Txn 3006178",
+        "data": {
+          "amount": 209.94,
+          "ts": "2026-01-03 01:45:05"
+        }
+      },
+      {
+        "id": "txn-3133432",
+        "type": "transaction",
+        "label": "Txn 3133432",
+        "data": {
+          "amount": 582.05,
+          "ts": "2026-01-31 23:10:29"
+        }
+      },
+      {
+        "id": "txn-3154533",
+        "type": "transaction",
+        "label": "Txn 3154533",
+        "data": {
+          "amount": 311.97,
+          "ts": "2026-02-07 01:58:06"
+        }
+      },
+      {
+        "id": "txn-3292758",
+        "type": "transaction",
+        "label": "Txn 3292758",
+        "data": {
+          "amount": 116.99,
+          "ts": "2026-03-25 16:59:06"
+        }
+      },
+      {
+        "id": "txn-3275275",
+        "type": "transaction",
+        "label": "Txn 3275275",
+        "data": {
+          "amount": 445.09,
+          "ts": "2026-03-19 15:03:59"
+        }
+      },
+      {
+        "id": "txn-3279839",
+        "type": "transaction",
+        "label": "Txn 3279839",
+        "data": {
+          "amount": 117.0,
+          "ts": "2026-03-20 22:54:03"
+        }
+      },
+      {
+        "id": "txn-3343102",
+        "type": "transaction",
+        "label": "Txn 3343102",
+        "data": {
+          "amount": 445.0,
+          "ts": "2026-04-08 21:20:01"
+        }
+      },
+      {
+        "id": "txn-3346219",
+        "type": "transaction",
+        "label": "Txn 3346219",
+        "data": {
+          "amount": 117.01,
+          "ts": "2026-04-09 20:38:22"
+        }
+      },
+      {
+        "id": "txn-3302750",
+        "type": "transaction",
+        "label": "Txn 3302750",
+        "data": {
+          "amount": 34.09,
+          "ts": "2026-03-28 21:58:04"
+        }
+      },
+      {
+        "id": "txn-3342493",
+        "type": "transaction",
+        "label": "Txn 3342493",
+        "data": {
+          "amount": 36.89,
+          "ts": "2026-04-08 18:42:01"
+        }
+      },
+      {
+        "id": "txn-3400612",
+        "type": "transaction",
+        "label": "Txn 3400612",
+        "data": {
+          "amount": 158.98,
+          "ts": "2026-04-27 20:45:17"
+        }
+      },
+      {
+        "id": "txn-3103105",
+        "type": "transaction",
+        "label": "Txn 3103105",
+        "data": {
+          "amount": 150.01,
+          "ts": "2026-01-24 21:46:01"
+        }
+      },
+      {
+        "id": "txn-3171496",
+        "type": "transaction",
+        "label": "Txn 3171496",
+        "data": {
+          "amount": 117.08,
+          "ts": "2026-02-12 20:53:05"
+        }
+      },
+      {
+        "id": "txn-3222220",
+        "type": "transaction",
+        "label": "Txn 3222220",
+        "data": {
+          "amount": 149.92,
+          "ts": "2026-03-02 14:34:41"
+        }
+      },
+      {
+        "id": "txn-3365626",
+        "type": "transaction",
+        "label": "Txn 3365626",
+        "data": {
+          "amount": 140.99,
+          "ts": "2026-04-16 00:27:52"
+        }
+      },
+      {
+        "id": "txn-3590562",
+        "type": "transaction",
+        "label": "Txn 3590562",
+        "data": {
+          "amount": 33.92,
+          "ts": "2026-07-02 22:55:46"
+        }
+      },
+      {
+        "id": "txn-3068200",
+        "type": "transaction",
+        "label": "Txn 3068200",
+        "data": {
+          "amount": 124.95,
+          "ts": "2026-01-18 17:24:05"
+        }
+      },
+      {
+        "id": "txn-3292271",
+        "type": "transaction",
+        "label": "Txn 3292271",
+        "data": {
+          "amount": 50.06,
+          "ts": "2026-03-25 13:56:22"
+        }
+      },
+      {
+        "id": "txn-3396222",
+        "type": "transaction",
+        "label": "Txn 3396222",
+        "data": {
+          "amount": 141.02,
+          "ts": "2026-04-26 13:40:11"
+        }
+      },
+      {
+        "id": "txn-3130153",
+        "type": "transaction",
+        "label": "Txn 3130153",
+        "data": {
+          "amount": 335.01,
+          "ts": "2026-01-30 23:24:00"
+        }
+      },
+      {
+        "id": "txn-3113409",
+        "type": "transaction",
+        "label": "Txn 3113409",
+        "data": {
+          "amount": 334.97,
+          "ts": "2026-01-26 21:04:01"
+        }
+      },
+      {
+        "id": "txn-3330129",
+        "type": "transaction",
+        "label": "Txn 3330129",
+        "data": {
+          "amount": 171.01,
+          "ts": "2026-04-05 03:25:25"
+        }
+      },
+      {
+        "id": "txn-3309389",
+        "type": "transaction",
+        "label": "Txn 3309389",
+        "data": {
+          "amount": 31.02,
+          "ts": "2026-03-30 23:19:12"
+        }
+      },
+      {
+        "id": "txn-3376171",
+        "type": "transaction",
+        "label": "Txn 3376171",
+        "data": {
+          "amount": 102.94,
+          "ts": "2026-04-19 18:21:43"
+        }
+      },
+      {
+        "id": "txn-3454839",
+        "type": "transaction",
+        "label": "Txn 3454839",
+        "data": {
+          "amount": 226.03,
+          "ts": "2026-05-15 18:07:02"
+        }
+      },
+      {
+        "id": "txn-3537523",
+        "type": "transaction",
+        "label": "Txn 3537523",
+        "data": {
+          "amount": 59.07,
+          "ts": "2026-06-13 21:45:01"
+        }
+      },
+      {
+        "id": "txn-3108054",
+        "type": "transaction",
+        "label": "Txn 3108054",
+        "data": {
+          "amount": 99.96,
+          "ts": "2026-01-25 20:27:07"
+        }
+      },
+      {
+        "id": "txn-3183853",
+        "type": "transaction",
+        "label": "Txn 3183853",
+        "data": {
+          "amount": 59.09,
+          "ts": "2026-02-16 23:55:09"
+        }
+      },
+      {
+        "id": "txn-3207217",
+        "type": "transaction",
+        "label": "Txn 3207217",
+        "data": {
+          "amount": 58.92,
+          "ts": "2026-02-25 01:50:56"
+        }
+      },
+      {
+        "id": "txn-3446832",
+        "type": "transaction",
+        "label": "Txn 3446832",
+        "data": {
+          "amount": 884.01,
+          "ts": "2026-05-12 17:21:44"
+        }
+      },
+      {
+        "id": "txn-3428952",
+        "type": "transaction",
+        "label": "Txn 3428952",
+        "data": {
+          "amount": 145.99,
+          "ts": "2026-05-06 14:21:56"
+        }
+      },
+      {
+        "id": "txn-3457587",
+        "type": "transaction",
+        "label": "Txn 3457587",
+        "data": {
+          "amount": 226.09,
+          "ts": "2026-05-16 18:31:45"
+        }
+      },
+      {
+        "id": "txn-3022978",
+        "type": "transaction",
+        "label": "Txn 3022978",
+        "data": {
+          "amount": 49.99,
+          "ts": "2026-01-07 20:37:29"
+        }
+      },
+      {
+        "id": "txn-3049290",
+        "type": "transaction",
+        "label": "Txn 3049290",
+        "data": {
+          "amount": 49.92,
+          "ts": "2026-01-14 14:53:11"
+        }
+      },
+      {
+        "id": "txn-3044307",
+        "type": "transaction",
+        "label": "Txn 3044307",
+        "data": {
+          "amount": 78.39,
+          "ts": "2026-01-13 03:06:21"
+        }
+      },
+      {
+        "id": "txn-3225011",
+        "type": "transaction",
+        "label": "Txn 3225011",
+        "data": {
+          "amount": 24.98,
+          "ts": "2026-03-03 13:26:25"
+        }
+      },
+      {
+        "id": "txn-3288333",
+        "type": "transaction",
+        "label": "Txn 3288333",
+        "data": {
+          "amount": 59.07,
+          "ts": "2026-03-23 22:53:18"
+        }
+      },
+      {
+        "id": "txn-3342589",
+        "type": "transaction",
+        "label": "Txn 3342589",
+        "data": {
+          "amount": 171.02,
+          "ts": "2026-04-08 19:10:07"
+        }
+      },
+      {
+        "id": "txn-3413871",
+        "type": "transaction",
+        "label": "Txn 3413871",
+        "data": {
+          "amount": 33.99,
+          "ts": "2026-05-01 22:59:22"
+        }
+      },
+      {
+        "id": "txn-3419383",
+        "type": "transaction",
+        "label": "Txn 3419383",
+        "data": {
+          "amount": 150.06,
+          "ts": "2026-05-03 18:00:32"
+        }
+      },
+      {
+        "id": "txn-3033723",
+        "type": "transaction",
+        "label": "Txn 3033723",
+        "data": {
+          "amount": 311.89,
+          "ts": "2026-01-10 17:57:49"
+        }
+      },
+      {
+        "id": "txn-3084267",
+        "type": "transaction",
+        "label": "Txn 3084267",
+        "data": {
+          "amount": 150.06,
+          "ts": "2026-01-21 18:30:36"
+        }
+      },
+      {
+        "id": "txn-3160797",
+        "type": "transaction",
+        "label": "Txn 3160797",
+        "data": {
+          "amount": 390.02,
+          "ts": "2026-02-09 01:40:42"
+        }
+      },
+      {
+        "id": "txn-3344081",
+        "type": "transaction",
+        "label": "Txn 3344081",
+        "data": {
+          "amount": 100.06,
+          "ts": "2026-04-09 01:20:27"
+        }
+      },
+      {
+        "id": "txn-3314748",
+        "type": "transaction",
+        "label": "Txn 3314748",
+        "data": {
+          "amount": 311.86,
+          "ts": "2026-04-01 15:30:31"
+        }
+      },
+      {
+        "id": "txn-3363728",
+        "type": "transaction",
+        "label": "Txn 3363728",
+        "data": {
+          "amount": 58.91,
+          "ts": "2026-04-15 15:00:41"
+        }
+      },
+      {
+        "id": "txn-3364812",
+        "type": "transaction",
+        "label": "Txn 3364812",
+        "data": {
+          "amount": 117.03,
+          "ts": "2026-04-15 20:32:19"
+        }
+      },
+      {
+        "id": "txn-3436006",
+        "type": "transaction",
+        "label": "Txn 3436006",
+        "data": {
+          "amount": 311.87,
+          "ts": "2026-05-08 19:10:35"
+        }
+      },
+      {
+        "id": "txn-3456149",
+        "type": "transaction",
+        "label": "Txn 3456149",
+        "data": {
+          "amount": 49.91,
+          "ts": "2026-05-16 01:20:43"
+        }
+      },
+      {
+        "id": "txn-3487671",
+        "type": "transaction",
+        "label": "Txn 3487671",
+        "data": {
+          "amount": 58.88,
+          "ts": "2026-05-27 23:01:51"
+        }
+      },
+      {
+        "id": "txn-3558995",
+        "type": "transaction",
+        "label": "Txn 3558995",
+        "data": {
+          "amount": 883.99,
+          "ts": "2026-06-21 04:37:20"
+        }
+      },
+      {
+        "id": "txn-3098586",
+        "type": "transaction",
+        "label": "Txn 3098586",
+        "data": {
+          "amount": 312.04,
+          "ts": "2026-01-24 00:35:21"
+        }
+      },
+      {
+        "id": "txn-3077016",
+        "type": "transaction",
+        "label": "Txn 3077016",
+        "data": {
+          "amount": 150.07,
+          "ts": "2026-01-20 12:41:11"
+        }
+      },
+      {
+        "id": "txn-3091532",
+        "type": "transaction",
+        "label": "Txn 3091532",
+        "data": {
+          "amount": 58.93,
+          "ts": "2026-01-22 21:58:34"
+        }
+      },
+      {
+        "id": "txn-3069494",
+        "type": "transaction",
+        "label": "Txn 3069494",
+        "data": {
+          "amount": 108.95,
+          "ts": "2026-01-18 21:10:41"
+        }
+      },
+      {
+        "id": "txn-3177444",
+        "type": "transaction",
+        "label": "Txn 3177444",
+        "data": {
+          "amount": 226.04,
+          "ts": "2026-02-14 21:26:57"
+        }
+      },
+      {
+        "id": "txn-3246248",
+        "type": "transaction",
+        "label": "Txn 3246248",
+        "data": {
+          "amount": 35.92,
+          "ts": "2026-03-09 18:10:33"
+        }
+      },
+      {
+        "id": "txn-3200956",
+        "type": "transaction",
+        "label": "Txn 3200956",
+        "data": {
+          "amount": 170.96,
+          "ts": "2026-02-22 21:51:49"
+        }
+      },
+      {
+        "id": "txn-3258981",
+        "type": "transaction",
+        "label": "Txn 3258981",
+        "data": {
+          "amount": 50.05,
+          "ts": "2026-03-13 22:58:16"
+        }
+      },
+      {
+        "id": "txn-3356885",
+        "type": "transaction",
+        "label": "Txn 3356885",
+        "data": {
+          "amount": 116.99,
+          "ts": "2026-04-13 01:48:16"
+        }
+      },
+      {
+        "id": "txn-3364837",
+        "type": "transaction",
+        "label": "Txn 3364837",
+        "data": {
+          "amount": 91.91,
+          "ts": "2026-04-15 20:43:26"
+        }
+      },
+      {
+        "id": "txn-3356009",
+        "type": "transaction",
+        "label": "Txn 3356009",
+        "data": {
+          "amount": 30.88,
+          "ts": "2026-04-12 21:56:41"
+        }
+      },
+      {
+        "id": "txn-3429062",
+        "type": "transaction",
+        "label": "Txn 3429062",
+        "data": {
+          "amount": 50.0,
+          "ts": "2026-05-06 14:56:51"
+        }
+      },
+      {
+        "id": "txn-3507926",
+        "type": "transaction",
+        "label": "Txn 3507926",
+        "data": {
+          "amount": 35.87,
+          "ts": "2026-06-03 20:40:50"
+        }
+      },
+      {
+        "id": "txn-3039820",
+        "type": "transaction",
+        "label": "Txn 3039820",
+        "data": {
+          "amount": 33.95,
+          "ts": "2026-01-12 01:41:49"
+        }
+      },
+      {
+        "id": "txn-3158869",
+        "type": "transaction",
+        "label": "Txn 3158869",
+        "data": {
+          "amount": 78.38,
+          "ts": "2026-02-08 17:00:10"
+        }
+      },
+      {
+        "id": "txn-3210884",
+        "type": "transaction",
+        "label": "Txn 3210884",
+        "data": {
+          "amount": 279.99,
+          "ts": "2026-02-26 15:59:18"
+        }
+      },
+      {
+        "id": "txn-3358737",
+        "type": "transaction",
+        "label": "Txn 3358737",
+        "data": {
+          "amount": 87.04,
+          "ts": "2026-04-13 20:20:36"
+        }
+      },
+      {
+        "id": "txn-3541662",
+        "type": "transaction",
+        "label": "Txn 3541662",
+        "data": {
+          "amount": 108.03,
+          "ts": "2026-06-15 12:20:58"
+        }
+      },
+      {
+        "id": "txn-3531329",
+        "type": "transaction",
+        "label": "Txn 3531329",
+        "data": {
+          "amount": 150.09,
+          "ts": "2026-06-11 19:48:00"
+        }
+      },
+      {
+        "id": "txn-3577443",
+        "type": "transaction",
+        "label": "Txn 3577443",
+        "data": {
+          "amount": 150.02,
+          "ts": "2026-06-27 21:10:02"
+        }
+      },
+      {
+        "id": "txn-3090826",
+        "type": "transaction",
+        "label": "Txn 3090826",
+        "data": {
+          "amount": 49.97,
+          "ts": "2026-01-22 20:22:07"
+        }
+      },
+      {
+        "id": "txn-3130117",
+        "type": "transaction",
+        "label": "Txn 3130117",
+        "data": {
+          "amount": 335.06,
+          "ts": "2026-01-30 23:15:15"
+        }
+      },
+      {
+        "id": "txn-3173444",
+        "type": "transaction",
+        "label": "Txn 3173444",
+        "data": {
+          "amount": 209.86,
+          "ts": "2026-02-13 16:23:58"
+        }
+      },
+      {
+        "id": "txn-3399582",
+        "type": "transaction",
+        "label": "Txn 3399582",
+        "data": {
+          "amount": 158.98,
+          "ts": "2026-04-27 15:44:36"
+        }
+      },
+      {
+        "id": "txn-3453539",
+        "type": "transaction",
+        "label": "Txn 3453539",
+        "data": {
+          "amount": 400.09,
+          "ts": "2026-05-15 01:29:04"
+        }
+      },
+      {
+        "id": "txn-3101847",
+        "type": "transaction",
+        "label": "Txn 3101847",
+        "data": {
+          "amount": 50.0,
+          "ts": "2026-01-24 18:37:34"
+        }
+      },
+      {
+        "id": "txn-3135688",
+        "type": "transaction",
+        "label": "Txn 3135688",
+        "data": {
+          "amount": 159.86,
+          "ts": "2026-02-01 19:01:46"
+        }
+      },
+      {
+        "id": "txn-3184968",
+        "type": "transaction",
+        "label": "Txn 3184968",
+        "data": {
+          "amount": 487.94,
+          "ts": "2026-02-17 14:55:10"
+        }
+      },
+      {
+        "id": "txn-3088949",
+        "type": "transaction",
+        "label": "Txn 3088949",
+        "data": {
+          "amount": 50.09,
+          "ts": "2026-01-22 15:55:53"
+        }
+      },
+      {
+        "id": "txn-3139068",
+        "type": "transaction",
+        "label": "Txn 3139068",
+        "data": {
+          "amount": 58.99,
+          "ts": "2026-02-02 18:30:42"
+        }
+      },
+      {
+        "id": "txn-3195393",
+        "type": "transaction",
+        "label": "Txn 3195393",
+        "data": {
+          "amount": 99.94,
+          "ts": "2026-02-20 23:05:32"
+        }
+      },
+      {
+        "id": "txn-3162138",
+        "type": "transaction",
+        "label": "Txn 3162138",
+        "data": {
+          "amount": 390.09,
+          "ts": "2026-02-09 17:48:29"
+        }
+      },
+      {
+        "id": "txn-3170180",
+        "type": "transaction",
+        "label": "Txn 3170180",
+        "data": {
+          "amount": 39.94,
+          "ts": "2026-02-12 14:00:53"
+        }
+      },
+      {
+        "id": "txn-3342904",
+        "type": "transaction",
+        "label": "Txn 3342904",
+        "data": {
+          "amount": 445.04,
+          "ts": "2026-04-08 20:29:49"
+        }
+      },
+      {
+        "id": "txn-3338320",
+        "type": "transaction",
+        "label": "Txn 3338320",
+        "data": {
+          "amount": 25.0,
+          "ts": "2026-04-07 13:59:04"
+        }
+      },
+      {
+        "id": "txn-3363533",
+        "type": "transaction",
+        "label": "Txn 3363533",
+        "data": {
+          "amount": 314.98,
+          "ts": "2026-04-15 13:38:22"
+        }
+      },
+      {
+        "id": "txn-3429135",
+        "type": "transaction",
+        "label": "Txn 3429135",
+        "data": {
+          "amount": 50.03,
+          "ts": "2026-05-06 15:16:02"
+        }
+      },
+      {
+        "id": "txn-3558965",
+        "type": "transaction",
+        "label": "Txn 3558965",
+        "data": {
+          "amount": 883.99,
+          "ts": "2026-06-21 04:00:48"
+        }
+      },
+      {
+        "id": "txn-3567472",
+        "type": "transaction",
+        "label": "Txn 3567472",
+        "data": {
+          "amount": 22.02,
+          "ts": "2026-06-24 00:05:39"
+        }
+      },
+      {
+        "id": "txn-3034040",
+        "type": "transaction",
+        "label": "Txn 3034040",
+        "data": {
+          "amount": 24.99,
+          "ts": "2026-01-10 19:01:38"
+        }
+      },
+      {
+        "id": "txn-3140438",
+        "type": "transaction",
+        "label": "Txn 3140438",
+        "data": {
+          "amount": 92.03,
+          "ts": "2026-02-03 00:11:20"
+        }
+      },
+      {
+        "id": "txn-3181172",
+        "type": "transaction",
+        "label": "Txn 3181172",
+        "data": {
+          "amount": 225.0,
+          "ts": "2026-02-16 01:13:17"
+        }
+      },
+      {
+        "id": "txn-3201084",
+        "type": "transaction",
+        "label": "Txn 3201084",
+        "data": {
+          "amount": 171.05,
+          "ts": "2026-02-22 22:26:35"
+        }
+      },
+      {
+        "id": "txn-3392517",
+        "type": "transaction",
+        "label": "Txn 3392517",
+        "data": {
+          "amount": 29.08,
+          "ts": "2026-04-25 01:44:03"
+        }
+      },
+      {
+        "id": "txn-3367866",
+        "type": "transaction",
+        "label": "Txn 3367866",
+        "data": {
+          "amount": 461.95,
+          "ts": "2026-04-16 21:17:42"
+        }
+      },
+      {
+        "id": "txn-3467489",
+        "type": "transaction",
+        "label": "Txn 3467489",
+        "data": {
+          "amount": 311.94,
+          "ts": "2026-05-20 12:57:19"
+        }
+      },
+      {
+        "id": "txn-3481019",
+        "type": "transaction",
+        "label": "Txn 3481019",
+        "data": {
+          "amount": 553.98,
+          "ts": "2026-05-25 16:02:16"
+        }
+      },
+      {
+        "id": "txn-3094118",
+        "type": "transaction",
+        "label": "Txn 3094118",
+        "data": {
+          "amount": 25.09,
+          "ts": "2026-01-23 12:06:53"
+        }
+      },
+      {
+        "id": "txn-3053354",
+        "type": "transaction",
+        "label": "Txn 3053354",
+        "data": {
+          "amount": 91.96,
+          "ts": "2026-01-15 13:55:25"
+        }
+      },
+      {
+        "id": "txn-3142459",
+        "type": "transaction",
+        "label": "Txn 3142459",
+        "data": {
+          "amount": 117.09,
+          "ts": "2026-02-03 18:07:54"
+        }
+      },
+      {
+        "id": "txn-3108170",
+        "type": "transaction",
+        "label": "Txn 3108170",
+        "data": {
+          "amount": 108.0,
+          "ts": "2026-01-25 20:43:51"
+        }
+      },
+      {
+        "id": "txn-3207466",
+        "type": "transaction",
+        "label": "Txn 3207466",
+        "data": {
+          "amount": 54.43,
+          "ts": "2026-02-25 03:48:11"
+        }
+      },
+      {
+        "id": "txn-3200984",
+        "type": "transaction",
+        "label": "Txn 3200984",
+        "data": {
+          "amount": 171.02,
+          "ts": "2026-02-22 21:59:10"
+        }
+      },
+      {
+        "id": "txn-3278970",
+        "type": "transaction",
+        "label": "Txn 3278970",
+        "data": {
+          "amount": 170.98,
+          "ts": "2026-03-20 18:52:56"
+        }
+      },
+      {
+        "id": "txn-3409800",
+        "type": "transaction",
+        "label": "Txn 3409800",
+        "data": {
+          "amount": 312.03,
+          "ts": "2026-04-30 19:29:10"
+        }
+      },
+      {
+        "id": "txn-3561879",
+        "type": "transaction",
+        "label": "Txn 3561879",
+        "data": {
+          "amount": 58.91,
+          "ts": "2026-06-22 12:56:55"
+        }
+      },
+      {
+        "id": "txn-3048987",
+        "type": "transaction",
+        "label": "Txn 3048987",
+        "data": {
+          "amount": 100.01,
+          "ts": "2026-01-14 12:26:02"
+        }
+      },
+      {
+        "id": "txn-3023906",
+        "type": "transaction",
+        "label": "Txn 3023906",
+        "data": {
+          "amount": 100.05,
+          "ts": "2026-01-08 00:03:57"
+        }
+      },
+      {
+        "id": "txn-3081735",
+        "type": "transaction",
+        "label": "Txn 3081735",
+        "data": {
+          "amount": 125.06,
+          "ts": "2026-01-21 03:01:05"
+        }
+      },
+      {
+        "id": "txn-3051382",
+        "type": "transaction",
+        "label": "Txn 3051382",
+        "data": {
+          "amount": 96.92,
+          "ts": "2026-01-14 22:07:27"
+        }
+      },
+      {
+        "id": "txn-3396276",
+        "type": "transaction",
+        "label": "Txn 3396276",
+        "data": {
+          "amount": 116.91,
+          "ts": "2026-04-26 14:07:45"
+        }
+      },
+      {
+        "id": "txn-3011354",
+        "type": "transaction",
+        "label": "Txn 3011354",
+        "data": {
+          "amount": 50.09,
+          "ts": "2026-01-04 18:42:20"
+        }
+      },
+      {
+        "id": "txn-3017822",
+        "type": "transaction",
+        "label": "Txn 3017822",
+        "data": {
+          "amount": 299.98,
+          "ts": "2026-01-06 14:56:06"
+        }
+      },
+      {
+        "id": "txn-3025207",
+        "type": "transaction",
+        "label": "Txn 3025207",
+        "data": {
+          "amount": 280.01,
+          "ts": "2026-01-08 14:24:43"
+        }
+      },
+      {
+        "id": "txn-3182224",
+        "type": "transaction",
+        "label": "Txn 3182224",
+        "data": {
+          "amount": 159.86,
+          "ts": "2026-02-16 16:16:17"
+        }
+      },
+      {
+        "id": "txn-3171310",
+        "type": "transaction",
+        "label": "Txn 3171310",
+        "data": {
+          "amount": 117.03,
+          "ts": "2026-02-12 19:59:36"
+        }
+      },
+      {
+        "id": "txn-3376381",
+        "type": "transaction",
+        "label": "Txn 3376381",
+        "data": {
+          "amount": 58.98,
+          "ts": "2026-04-19 19:17:36"
+        }
+      },
+      {
+        "id": "txn-3002221",
+        "type": "transaction",
+        "label": "Txn 3002221",
+        "data": {
+          "amount": 49.96,
+          "ts": "2026-01-02 00:38:45"
+        }
+      },
+      {
+        "id": "txn-3043766",
+        "type": "transaction",
+        "label": "Txn 3043766",
+        "data": {
+          "amount": 49.97,
+          "ts": "2026-01-13 00:38:34"
+        }
+      },
+      {
+        "id": "txn-3006150",
+        "type": "transaction",
+        "label": "Txn 3006150",
+        "data": {
+          "amount": 19.97,
+          "ts": "2026-01-03 01:35:09"
+        }
+      },
+      {
+        "id": "txn-3185417",
+        "type": "transaction",
+        "label": "Txn 3185417",
+        "data": {
+          "amount": 554.04,
+          "ts": "2026-02-17 17:30:51"
+        }
+      },
+      {
+        "id": "txn-3386076",
+        "type": "transaction",
+        "label": "Txn 3386076",
+        "data": {
+          "amount": 116.91,
+          "ts": "2026-04-22 23:20:04"
+        }
+      },
+      {
+        "id": "txn-3358740",
+        "type": "transaction",
+        "label": "Txn 3358740",
+        "data": {
+          "amount": 96.97,
+          "ts": "2026-04-13 20:21:20"
+        }
+      },
+      {
+        "id": "txn-3446685",
+        "type": "transaction",
+        "label": "Txn 3446685",
+        "data": {
+          "amount": 1586.94,
+          "ts": "2026-05-12 16:36:07"
+        }
+      },
+      {
+        "id": "txn-3438093",
+        "type": "transaction",
+        "label": "Txn 3438093",
+        "data": {
+          "amount": 265.06,
+          "ts": "2026-05-09 14:51:56"
+        }
+      },
+      {
+        "id": "txn-3531361",
+        "type": "transaction",
+        "label": "Txn 3531361",
+        "data": {
+          "amount": 149.93,
+          "ts": "2026-06-11 19:57:23"
+        }
+      },
+      {
+        "id": "txn-3030697",
+        "type": "transaction",
+        "label": "Txn 3030697",
+        "data": {
+          "amount": 50.06,
+          "ts": "2026-01-09 21:06:16"
+        }
+      },
+      {
+        "id": "txn-3143731",
+        "type": "transaction",
+        "label": "Txn 3143731",
+        "data": {
+          "amount": 335.02,
+          "ts": "2026-02-03 22:45:38"
+        }
+      },
+      {
+        "id": "txn-3184154",
+        "type": "transaction",
+        "label": "Txn 3184154",
+        "data": {
+          "amount": 42.93,
+          "ts": "2026-02-17 01:35:53"
+        }
+      },
+      {
+        "id": "txn-3353042",
+        "type": "transaction",
+        "label": "Txn 3353042",
+        "data": {
+          "amount": 28.93,
+          "ts": "2026-04-11 22:46:10"
+        }
+      },
+      {
+        "id": "txn-3508124",
+        "type": "transaction",
+        "label": "Txn 3508124",
+        "data": {
+          "amount": 108.04,
+          "ts": "2026-06-03 21:28:03"
+        }
+      },
+      {
+        "id": "txn-3071209",
+        "type": "transaction",
+        "label": "Txn 3071209",
+        "data": {
+          "amount": 55.06,
+          "ts": "2026-01-19 03:05:48"
+        }
+      },
+      {
+        "id": "txn-3061749",
+        "type": "transaction",
+        "label": "Txn 3061749",
+        "data": {
+          "amount": 59.91,
+          "ts": "2026-01-17 03:43:52"
+        }
+      },
+      {
+        "id": "txn-3138483",
+        "type": "transaction",
+        "label": "Txn 3138483",
+        "data": {
+          "amount": 213.0,
+          "ts": "2026-02-02 16:01:10"
+        }
+      },
+      {
+        "id": "txn-3118998",
+        "type": "transaction",
+        "label": "Txn 3118998",
+        "data": {
+          "amount": 54.01,
+          "ts": "2026-01-28 00:39:20"
+        }
+      },
+      {
+        "id": "txn-3146275",
+        "type": "transaction",
+        "label": "Txn 3146275",
+        "data": {
+          "amount": 445.02,
+          "ts": "2026-02-04 19:15:53"
+        }
+      },
+      {
+        "id": "txn-3219904",
+        "type": "transaction",
+        "label": "Txn 3219904",
+        "data": {
+          "amount": 21.0,
+          "ts": "2026-03-01 17:46:46"
+        }
+      },
+      {
+        "id": "txn-3387871",
+        "type": "transaction",
+        "label": "Txn 3387871",
+        "data": {
+          "amount": 141.05,
+          "ts": "2026-04-23 17:26:15"
+        }
+      },
+      {
+        "id": "txn-3446970",
+        "type": "transaction",
+        "label": "Txn 3446970",
+        "data": {
+          "amount": 485.0,
+          "ts": "2026-05-12 18:12:19"
+        }
+      },
+      {
+        "id": "txn-3511673",
+        "type": "transaction",
+        "label": "Txn 3511673",
+        "data": {
+          "amount": 107.98,
+          "ts": "2026-06-04 23:25:54"
+        }
+      },
+      {
+        "id": "txn-3017681",
+        "type": "transaction",
+        "label": "Txn 3017681",
+        "data": {
+          "amount": 116.98,
+          "ts": "2026-01-06 14:11:02"
+        }
+      },
+      {
+        "id": "txn-3209160",
+        "type": "transaction",
+        "label": "Txn 3209160",
+        "data": {
+          "amount": 58.92,
+          "ts": "2026-02-25 21:29:15"
+        }
+      },
+      {
+        "id": "txn-3349135",
+        "type": "transaction",
+        "label": "Txn 3349135",
+        "data": {
+          "amount": 91.92,
+          "ts": "2026-04-10 19:27:33"
+        }
+      },
+      {
+        "id": "txn-3384713",
+        "type": "transaction",
+        "label": "Txn 3384713",
+        "data": {
+          "amount": 116.94,
+          "ts": "2026-04-22 16:36:20"
+        }
+      },
+      {
+        "id": "txn-3402585",
+        "type": "transaction",
+        "label": "Txn 3402585",
+        "data": {
+          "amount": 170.98,
+          "ts": "2026-04-28 15:44:25"
+        }
+      },
+      {
+        "id": "txn-3419333",
+        "type": "transaction",
+        "label": "Txn 3419333",
+        "data": {
+          "amount": 100.01,
+          "ts": "2026-05-03 17:49:22"
+        }
+      },
+      {
+        "id": "txn-3007932",
+        "type": "transaction",
+        "label": "Txn 3007932",
+        "data": {
+          "amount": 100.02,
+          "ts": "2026-01-03 18:30:01"
+        }
+      },
+      {
+        "id": "txn-3103346",
+        "type": "transaction",
+        "label": "Txn 3103346",
+        "data": {
+          "amount": 112.92,
+          "ts": "2026-01-24 22:29:55"
+        }
+      },
+      {
+        "id": "txn-3207238",
+        "type": "transaction",
+        "label": "Txn 3207238",
+        "data": {
+          "amount": 59.02,
+          "ts": "2026-02-25 01:56:25"
+        }
+      },
+      {
+        "id": "txn-3340979",
+        "type": "transaction",
+        "label": "Txn 3340979",
+        "data": {
+          "amount": 444.93,
+          "ts": "2026-04-08 02:19:12"
+        }
+      },
+      {
+        "id": "txn-3376146",
+        "type": "transaction",
+        "label": "Txn 3376146",
+        "data": {
+          "amount": 103.93,
+          "ts": "2026-04-19 18:14:17"
+        }
+      },
+      {
+        "id": "txn-3410072",
+        "type": "transaction",
+        "label": "Txn 3410072",
+        "data": {
+          "amount": 57.98,
+          "ts": "2026-04-30 20:43:26"
+        }
+      },
+      {
+        "id": "txn-3030837",
+        "type": "transaction",
+        "label": "Txn 3030837",
+        "data": {
+          "amount": 50.02,
+          "ts": "2026-01-09 21:34:02"
+        }
+      },
+      {
+        "id": "txn-3062625",
+        "type": "transaction",
+        "label": "Txn 3062625",
+        "data": {
+          "amount": 250.04,
+          "ts": "2026-01-17 14:59:35"
+        }
+      },
+      {
+        "id": "txn-3102359",
+        "type": "transaction",
+        "label": "Txn 3102359",
+        "data": {
+          "amount": 553.92,
+          "ts": "2026-01-24 19:54:42"
+        }
+      },
+      {
+        "id": "txn-3160680",
+        "type": "transaction",
+        "label": "Txn 3160680",
+        "data": {
+          "amount": 385.92,
+          "ts": "2026-02-09 00:57:54"
+        }
+      },
+      {
+        "id": "txn-3385818",
+        "type": "transaction",
+        "label": "Txn 3385818",
+        "data": {
+          "amount": 92.09,
+          "ts": "2026-04-22 22:05:14"
+        }
+      },
+      {
+        "id": "txn-3548289",
+        "type": "transaction",
+        "label": "Txn 3548289",
+        "data": {
+          "amount": 105.09,
+          "ts": "2026-06-17 15:41:27"
+        }
+      },
+      {
+        "id": "txn-3017846",
+        "type": "transaction",
+        "label": "Txn 3017846",
+        "data": {
+          "amount": 50.06,
+          "ts": "2026-01-06 15:03:10"
+        }
+      },
+      {
+        "id": "txn-3223040",
+        "type": "transaction",
+        "label": "Txn 3223040",
+        "data": {
+          "amount": 171.0,
+          "ts": "2026-03-02 18:54:06"
+        }
+      },
+      {
+        "id": "txn-3326884",
+        "type": "transaction",
+        "label": "Txn 3326884",
+        "data": {
+          "amount": 663.93,
+          "ts": "2026-04-04 15:13:17"
+        }
+      },
+      {
+        "id": "txn-3379921",
+        "type": "transaction",
+        "label": "Txn 3379921",
+        "data": {
+          "amount": 117.03,
+          "ts": "2026-04-20 21:48:16"
+        }
+      },
+      {
+        "id": "txn-3458424",
+        "type": "transaction",
+        "label": "Txn 3458424",
+        "data": {
+          "amount": 50.01,
+          "ts": "2026-05-16 22:57:50"
+        }
+      },
+      {
+        "id": "txn-3560595",
+        "type": "transaction",
+        "label": "Txn 3560595",
+        "data": {
+          "amount": 108.04,
+          "ts": "2026-06-21 21:02:44"
+        }
+      },
+      {
+        "id": "txn-3554120",
+        "type": "transaction",
+        "label": "Txn 3554120",
+        "data": {
+          "amount": 1331.02,
+          "ts": "2026-06-19 16:04:16"
+        }
+      },
+      {
+        "id": "txn-3097116",
+        "type": "transaction",
+        "label": "Txn 3097116",
+        "data": {
+          "amount": 125.04,
+          "ts": "2026-01-23 20:49:19"
+        }
+      },
+      {
+        "id": "txn-3140490",
+        "type": "transaction",
+        "label": "Txn 3140490",
+        "data": {
+          "amount": 91.99,
+          "ts": "2026-02-03 00:24:36"
+        }
+      },
+      {
+        "id": "txn-3141553",
+        "type": "transaction",
+        "label": "Txn 3141553",
+        "data": {
+          "amount": 92.09,
+          "ts": "2026-02-03 13:52:01"
+        }
+      },
+      {
+        "id": "txn-3100832",
+        "type": "transaction",
+        "label": "Txn 3100832",
+        "data": {
+          "amount": 99.94,
+          "ts": "2026-01-24 16:05:14"
+        }
+      },
+      {
+        "id": "txn-3174581",
+        "type": "transaction",
+        "label": "Txn 3174581",
+        "data": {
+          "amount": 117.0,
+          "ts": "2026-02-13 21:36:17"
+        }
+      },
+      {
+        "id": "txn-3166054",
+        "type": "transaction",
+        "label": "Txn 3166054",
+        "data": {
+          "amount": 946.94,
+          "ts": "2026-02-10 22:06:10"
+        }
+      },
+      {
+        "id": "txn-3222744",
+        "type": "transaction",
+        "label": "Txn 3222744",
+        "data": {
+          "amount": 311.98,
+          "ts": "2026-03-02 17:27:51"
+        }
+      },
+      {
+        "id": "txn-3209115",
+        "type": "transaction",
+        "label": "Txn 3209115",
+        "data": {
+          "amount": 58.97,
+          "ts": "2026-02-25 21:15:06"
+        }
+      },
+      {
+        "id": "txn-3268802",
+        "type": "transaction",
+        "label": "Txn 3268802",
+        "data": {
+          "amount": 855.05,
+          "ts": "2026-03-17 04:01:07"
+        }
+      },
+      {
+        "id": "txn-3277077",
+        "type": "transaction",
+        "label": "Txn 3277077",
+        "data": {
+          "amount": 399.98,
+          "ts": "2026-03-20 00:02:53"
+        }
+      },
+      {
+        "id": "txn-3357880",
+        "type": "transaction",
+        "label": "Txn 3357880",
+        "data": {
+          "amount": 58.02,
+          "ts": "2026-04-13 16:17:01"
+        }
+      },
+      {
+        "id": "txn-3404298",
+        "type": "transaction",
+        "label": "Txn 3404298",
+        "data": {
+          "amount": 159.09,
+          "ts": "2026-04-28 23:43:22"
+        }
+      },
+      {
+        "id": "txn-3544225",
+        "type": "transaction",
+        "label": "Txn 3544225",
+        "data": {
+          "amount": 57.93,
+          "ts": "2026-06-16 00:52:06"
+        }
+      },
+      {
+        "id": "txn-3581784",
+        "type": "transaction",
+        "label": "Txn 3581784",
+        "data": {
+          "amount": 108.02,
+          "ts": "2026-06-29 17:05:48"
+        }
+      },
+      {
+        "id": "txn-3010126",
+        "type": "transaction",
+        "label": "Txn 3010126",
+        "data": {
+          "amount": 48.97,
+          "ts": "2026-01-04 06:43:17"
+        }
+      },
+      {
+        "id": "txn-3072653",
+        "type": "transaction",
+        "label": "Txn 3072653",
+        "data": {
+          "amount": 59.04,
+          "ts": "2026-01-19 15:59:16"
+        }
+      },
+      {
+        "id": "txn-3228957",
+        "type": "transaction",
+        "label": "Txn 3228957",
+        "data": {
+          "amount": 100.08,
+          "ts": "2026-03-04 17:08:22"
+        }
+      },
+      {
+        "id": "txn-3230073",
+        "type": "transaction",
+        "label": "Txn 3230073",
+        "data": {
+          "amount": 24.95,
+          "ts": "2026-03-04 21:27:27"
+        }
+      },
+      {
+        "id": "txn-3313008",
+        "type": "transaction",
+        "label": "Txn 3313008",
+        "data": {
+          "amount": 116.93,
+          "ts": "2026-03-31 23:43:03"
+        }
+      },
+      {
+        "id": "txn-3359611",
+        "type": "transaction",
+        "label": "Txn 3359611",
+        "data": {
+          "amount": 58.97,
+          "ts": "2026-04-14 00:23:47"
+        }
+      },
+      {
+        "id": "txn-3367811",
+        "type": "transaction",
+        "label": "Txn 3367811",
+        "data": {
+          "amount": 461.91,
+          "ts": "2026-04-16 21:01:47"
+        }
+      },
+      {
+        "id": "txn-3448076",
+        "type": "transaction",
+        "label": "Txn 3448076",
+        "data": {
+          "amount": 159.96,
+          "ts": "2026-05-13 00:11:51"
+        }
+      },
+      {
+        "id": "txn-3040787",
+        "type": "transaction",
+        "label": "Txn 3040787",
+        "data": {
+          "amount": 200.96,
+          "ts": "2026-01-12 14:04:43"
+        }
+      },
+      {
+        "id": "txn-3077121",
+        "type": "transaction",
+        "label": "Txn 3077121",
+        "data": {
+          "amount": 191.09,
+          "ts": "2026-01-20 13:36:28"
+        }
+      },
+      {
+        "id": "txn-3200010",
+        "type": "transaction",
+        "label": "Txn 3200010",
+        "data": {
+          "amount": 97.04,
+          "ts": "2026-02-22 17:21:57"
+        }
+      },
+      {
+        "id": "txn-3268834",
+        "type": "transaction",
+        "label": "Txn 3268834",
+        "data": {
+          "amount": 854.99,
+          "ts": "2026-03-17 04:18:49"
+        }
+      },
+      {
+        "id": "txn-3349244",
+        "type": "transaction",
+        "label": "Txn 3349244",
+        "data": {
+          "amount": 460.92,
+          "ts": "2026-04-10 20:02:32"
+        }
+      },
+      {
+        "id": "txn-3324885",
+        "type": "transaction",
+        "label": "Txn 3324885",
+        "data": {
+          "amount": 58.98,
+          "ts": "2026-04-03 22:23:24"
+        }
+      },
+      {
+        "id": "txn-3342518",
+        "type": "transaction",
+        "label": "Txn 3342518",
+        "data": {
+          "amount": 36.97,
+          "ts": "2026-04-08 18:51:24"
+        }
+      },
+      {
+        "id": "txn-3396218",
+        "type": "transaction",
+        "label": "Txn 3396218",
+        "data": {
+          "amount": 117.06,
+          "ts": "2026-04-26 13:38:33"
+        }
+      },
+      {
+        "id": "txn-3367444",
+        "type": "transaction",
+        "label": "Txn 3367444",
+        "data": {
+          "amount": 96.94,
+          "ts": "2026-04-16 19:10:54"
+        }
+      },
+      {
+        "id": "txn-3376101",
+        "type": "transaction",
+        "label": "Txn 3376101",
+        "data": {
+          "amount": 102.99,
+          "ts": "2026-04-19 17:58:10"
+        }
+      },
+      {
+        "id": "txn-3421729",
+        "type": "transaction",
+        "label": "Txn 3421729",
+        "data": {
+          "amount": 52.87,
+          "ts": "2026-05-04 12:16:50"
+        }
+      },
+      {
+        "id": "txn-3540424",
+        "type": "transaction",
+        "label": "Txn 3540424",
+        "data": {
+          "amount": 38.96,
+          "ts": "2026-06-14 21:39:22"
+        }
+      },
+      {
+        "id": "txn-3577511",
+        "type": "transaction",
+        "label": "Txn 3577511",
+        "data": {
+          "amount": 150.07,
+          "ts": "2026-06-27 21:27:50"
+        }
+      },
+      {
+        "id": "txn-3033866",
+        "type": "transaction",
+        "label": "Txn 3033866",
+        "data": {
+          "amount": 74.91,
+          "ts": "2026-01-10 18:26:38"
+        }
+      },
+      {
+        "id": "txn-3082949",
+        "type": "transaction",
+        "label": "Txn 3082949",
+        "data": {
+          "amount": 97.09,
+          "ts": "2026-01-21 14:56:10"
+        }
+      },
+      {
+        "id": "txn-3134873",
+        "type": "transaction",
+        "label": "Txn 3134873",
+        "data": {
+          "amount": 48.01,
+          "ts": "2026-02-01 15:09:52"
+        }
+      },
+      {
+        "id": "txn-3212508",
+        "type": "transaction",
+        "label": "Txn 3212508",
+        "data": {
+          "amount": 35.99,
+          "ts": "2026-02-26 23:48:38"
+        }
+      },
+      {
+        "id": "txn-3499109",
+        "type": "transaction",
+        "label": "Txn 3499109",
+        "data": {
+          "amount": 116.91,
+          "ts": "2026-06-01 01:05:10"
+        }
+      },
+      {
+        "id": "txn-3466072",
+        "type": "transaction",
+        "label": "Txn 3466072",
+        "data": {
+          "amount": 883.99,
+          "ts": "2026-05-19 20:56:34"
+        }
+      },
+      {
+        "id": "txn-3538202",
+        "type": "transaction",
+        "label": "Txn 3538202",
+        "data": {
+          "amount": 36.89,
+          "ts": "2026-06-14 01:29:33"
+        }
+      },
+      {
+        "id": "txn-3559884",
+        "type": "transaction",
+        "label": "Txn 3559884",
+        "data": {
+          "amount": 842.08,
+          "ts": "2026-06-21 17:08:51"
+        }
+      },
+      {
+        "id": "txn-3585336",
+        "type": "transaction",
+        "label": "Txn 3585336",
+        "data": {
+          "amount": 82.94,
+          "ts": "2026-06-30 23:47:48"
+        }
+      },
+      {
+        "id": "txn-3193927",
+        "type": "transaction",
+        "label": "Txn 3193927",
+        "data": {
+          "amount": 96.92,
+          "ts": "2026-02-20 16:31:46"
+        }
+      },
+      {
+        "id": "txn-3166257",
+        "type": "transaction",
+        "label": "Txn 3166257",
+        "data": {
+          "amount": 946.92,
+          "ts": "2026-02-10 22:59:36"
+        }
+      },
+      {
+        "id": "txn-3343661",
+        "type": "transaction",
+        "label": "Txn 3343661",
+        "data": {
+          "amount": 444.99,
+          "ts": "2026-04-08 23:25:54"
+        }
+      },
+      {
+        "id": "txn-3312045",
+        "type": "transaction",
+        "label": "Txn 3312045",
+        "data": {
+          "amount": 319.91,
+          "ts": "2026-03-31 19:43:46"
+        }
+      },
+      {
+        "id": "txn-3400309",
+        "type": "transaction",
+        "label": "Txn 3400309",
+        "data": {
+          "amount": 30.94,
+          "ts": "2026-04-27 19:28:41"
+        }
+      },
+      {
+        "id": "txn-3072382",
+        "type": "transaction",
+        "label": "Txn 3072382",
+        "data": {
+          "amount": 75.08,
+          "ts": "2026-01-19 15:08:24"
+        }
+      },
+      {
+        "id": "txn-3094387",
+        "type": "transaction",
+        "label": "Txn 3094387",
+        "data": {
+          "amount": 25.02,
+          "ts": "2026-01-23 14:00:41"
+        }
+      },
+      {
+        "id": "txn-3097486",
+        "type": "transaction",
+        "label": "Txn 3097486",
+        "data": {
+          "amount": 445.03,
+          "ts": "2026-01-23 21:42:58"
+        }
+      },
+      {
+        "id": "txn-3096215",
+        "type": "transaction",
+        "label": "Txn 3096215",
+        "data": {
+          "amount": 773.98,
+          "ts": "2026-01-23 18:41:46"
+        }
+      },
+      {
+        "id": "txn-3267740",
+        "type": "transaction",
+        "label": "Txn 3267740",
+        "data": {
+          "amount": 47.93,
+          "ts": "2026-03-16 22:15:30"
+        }
+      },
+      {
+        "id": "txn-3340295",
+        "type": "transaction",
+        "label": "Txn 3340295",
+        "data": {
+          "amount": 445.09,
+          "ts": "2026-04-07 23:06:46"
+        }
+      },
+      {
+        "id": "txn-3445074",
+        "type": "transaction",
+        "label": "Txn 3445074",
+        "data": {
+          "amount": 986.51,
+          "ts": "2026-05-11 22:07:34"
+        }
+      },
+      {
+        "id": "txn-3457703",
+        "type": "transaction",
+        "label": "Txn 3457703",
+        "data": {
+          "amount": 226.03,
+          "ts": "2026-05-16 19:10:00"
+        }
+      },
+      {
+        "id": "txn-3078433",
+        "type": "transaction",
+        "label": "Txn 3078433",
+        "data": {
+          "amount": 279.96,
+          "ts": "2026-01-20 17:43:34"
+        }
+      },
+      {
+        "id": "txn-3064986",
+        "type": "transaction",
+        "label": "Txn 3064986",
+        "data": {
+          "amount": 99.97,
+          "ts": "2026-01-17 22:09:23"
+        }
+      },
+      {
+        "id": "txn-3171000",
+        "type": "transaction",
+        "label": "Txn 3171000",
+        "data": {
+          "amount": 150.0,
+          "ts": "2026-02-12 18:38:57"
+        }
+      },
+      {
+        "id": "txn-3206829",
+        "type": "transaction",
+        "label": "Txn 3206829",
+        "data": {
+          "amount": 59.04,
+          "ts": "2026-02-24 23:48:26"
+        }
+      },
+      {
+        "id": "txn-3240693",
+        "type": "transaction",
+        "label": "Txn 3240693",
+        "data": {
+          "amount": 116.92,
+          "ts": "2026-03-07 22:10:26"
+        }
+      },
+      {
+        "id": "txn-3298626",
+        "type": "transaction",
+        "label": "Txn 3298626",
+        "data": {
+          "amount": 116.92,
+          "ts": "2026-03-27 16:41:46"
+        }
+      },
+      {
+        "id": "case-HHG-019",
+        "type": "case",
+        "label": "Case HHG-019",
+        "data": {}
+      },
+      {
+        "id": "cc-CC-2971",
+        "type": "closed_case",
+        "label": "CC-2971",
+        "data": {
+          "verdict": "confirmed_fraud",
+          "pattern": "undocumented",
+          "similarity": 0.693
+        }
+      },
+      {
+        "id": "cc-CC-3035",
+        "type": "closed_case",
+        "label": "CC-3035",
+        "data": {
+          "verdict": "confirmed_fraud",
+          "pattern": "undocumented",
+          "similarity": 0.67
+        }
+      },
+      {
+        "id": "cc-CC-2985",
+        "type": "closed_case",
+        "label": "CC-2985",
+        "data": {
+          "verdict": "confirmed_fraud",
+          "pattern": "undocumented",
+          "similarity": 0.584
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "card-11539_0",
+        "target": "txn-3503878",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3030290",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3100333",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3184679",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3214886",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3209424",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3429104",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3495125",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3103012",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3101852",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3104707",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3254724",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3330361",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3370737",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3512695",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3521616",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3568651",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3564124",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3015182",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3006178",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3133432",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3154533",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3292758",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3275275",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3279839",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3343102",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3346219",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3302750",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3342493",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3400612",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3103105",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3171496",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3222220",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3365626",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3590562",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3068200",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3292271",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3396222",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3130153",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3113409",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3330129",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3309389",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3376171",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3454839",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3537523",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3108054",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3183853",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3207217",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3446832",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3428952",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3457587",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3022978",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3049290",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3044307",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3225011",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3288333",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3342589",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3413871",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3419383",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3033723",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3084267",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3160797",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3344081",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3314748",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3363728",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3364812",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3436006",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3456149",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3487671",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3558995",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3098586",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3077016",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3091532",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3069494",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3177444",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3246248",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3200956",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3258981",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3356885",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3364837",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3356009",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3429062",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3507926",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3039820",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3158869",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3210884",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3358737",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3541662",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3531329",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3577443",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3090826",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3130117",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3173444",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3399582",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3453539",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3101847",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3135688",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3184968",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3088949",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3139068",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3195393",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3162138",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3170180",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3342904",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3338320",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3363533",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3429135",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3558965",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3567472",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3034040",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3140438",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3181172",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3201084",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3392517",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3367866",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3467489",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3481019",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3094118",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3053354",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3142459",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3108170",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3207466",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3200984",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3278970",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3409800",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3561879",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3048987",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3023906",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3081735",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3051382",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3396276",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3011354",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3017822",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3025207",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3182224",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3171310",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3376381",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3002221",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3043766",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3006150",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3185417",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3386076",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3358740",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3446685",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3438093",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3531361",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3030697",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3143731",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3184154",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3353042",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3508124",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3071209",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3061749",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3138483",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3118998",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3146275",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3219904",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3387871",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3446970",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3511673",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3017681",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3209160",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3349135",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3384713",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3402585",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3419333",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3007932",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3103346",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3207238",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3340979",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3376146",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3410072",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3030837",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3062625",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3102359",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3160680",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3385818",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3548289",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3017846",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3223040",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3326884",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3379921",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3458424",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3560595",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3554120",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3097116",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3140490",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3141553",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3100832",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3174581",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3166054",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3222744",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3209115",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3268802",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3277077",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3357880",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3404298",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3544225",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3581784",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3010126",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3072653",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3228957",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3230073",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3313008",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3359611",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3367811",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3448076",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3040787",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3077121",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3200010",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3268834",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3349244",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3324885",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3342518",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3396218",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3367444",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3376101",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3421729",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3540424",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3577511",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3033866",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3082949",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3134873",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3212508",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3499109",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3466072",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3538202",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3559884",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3585336",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3193927",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3166257",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3343661",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3312045",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3400309",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3072382",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3094387",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3097486",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3096215",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3267740",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3340295",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3445074",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3457703",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3078433",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3064986",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3171000",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3206829",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3240693",
+        "label": "MADE"
+      },
+      {
+        "source": "card-11539_0",
+        "target": "txn-3298626",
+        "label": "MADE"
+      },
+      {
+        "source": "case-HHG-019",
+        "target": "txn-3503878",
+        "label": "INVOLVES"
+      },
+      {
+        "source": "case-HHG-019",
+        "target": "cc-CC-2971",
+        "label": "SIMILAR_TO"
+      },
+      {
+        "source": "case-HHG-019",
+        "target": "cc-CC-3035",
+        "label": "SIMILAR_TO"
+      },
+      {
+        "source": "case-HHG-019",
+        "target": "cc-CC-2985",
+        "label": "SIMILAR_TO"
+      }
+    ]
+  },
+  "metadata": {
+    "duration_seconds": 49.45,
+    "jev_classification": {
+      "engine": "heuristic",
+      "status": "error",
+      "pattern": "undocumented",
+      "pattern_label": "Undocumented Pattern",
+      "jev_pattern": "Undocumented Pattern",
+      "confidence": 0.75,
+      "jev_confidence": 0.75,
+      "probabilities": {},
+      "sufficiency": 0.9,
+      "coordination": 0.2
+    },
+    "llm_ok": true,
+    "generated_at": "2026-09-23T19:57:09Z"
+  }
+}

@@ -1,18 +1,41 @@
 # Policy Engine
 
-> [[Home]] · [[Agent-Workflow]] · [[PRD]]
+> [[Home]] · [[Agent-Workflow]] · [[PRD]] · [[Jev]]
 
 ## Principle
 
-The fraud policy is **deterministic, inspectable code** — NOT hidden inside LLM prompts.
+The fraud policy is **deterministic, inspectable code** in `agent/policy.py` — NOT hidden inside LLM prompts.
 
 ```
 LLM reasoning → produces evidence + probability
-Jev classification → produces pattern + signals
-Policy engine → deterministically selects actions + approval routes
+Jev classification → produces pattern + coordination signals
+Policy engine (policy.apply_policy) → deterministically selects actions + approval routes
 ```
 
-The LLM must NOT override policy. It informs; policy decides.
+The LLM must NOT override policy. It informs; policy decides. Every action object
+carries `{"action", "route", "reason"}` and the reason cites the driving rule
+(e.g. `"R5: a purchase over $100 has already cleared"`).
+
+## Implemented Engine
+
+`apply_policy(state)` evaluates the **current** state and returns:
+
+```python
+{
+  "final_actions":  [{"action", "route", "reason"} ...],   # ordered by execution order
+  "initial_actions": [...],                                # echo of state's recorded pre-evidence actions
+  "sar_required": bool,                                    # == (FILE_REPORT in final_actions)
+  "sar_reason": str,                                       # the FILE_REPORT reason, or ""
+}
+```
+
+The graph calls it twice: once **before** evidence requests (stored as
+`initial_actions`, with the prior probability and no customer response) and once
+after assessment/reassessment (stored as `final_actions`). Actions are deduped by
+name keeping the highest-severity route (`auto` < `L1` < `L2`) and sorted by
+execution order (policy §1): ALLOW → VERIFY → STEP_UP → WARN → MONITOR_CARD →
+MONITOR_CONNECTED_CARDS → DECLINE → BLOCK_CARD → BLOCK_ALL_CARDS → CREATE_CASE →
+GENERATE_REPORT → FILE_REPORT → ESCALATE → CLOSE_NO_FRAUD.
 
 ## Actions Reference
 
@@ -33,148 +56,105 @@ The LLM must NOT override policy. It informs; policy decides.
 | `ESCALATE_TO_ANALYST` | None | Hand to human analyst |
 | `CLOSE_NO_FRAUD` | None | Close alert as legitimate |
 
-Multiple actions per case allowed. Order by execution priority.
-
-## Approval Routes
+## Approval Routes (implemented in `_route`)
 
 | Route | Actions |
 |---|---|
 | `auto` | ALLOW_TRANSACTION, MONITOR_CARD, MONITOR_CONNECTED_CARDS, WARN_CUSTOMER, VERIFY_WITH_CUSTOMER, STEP_UP_AUTH, GENERATE_REPORT, CREATE_CASE, ESCALATE_TO_ANALYST, CLOSE_NO_FRAUD |
-| `L1` (team lead) | DECLINE_TRANSACTION; BLOCK_CARD when exposure ≤ $2,500 |
-| `L2` (fraud manager) | BLOCK_CARD when exposure > $2,500; BLOCK_ALL_CARDS always; FILE_REPORT always |
+| `L1` | DECLINE_TRANSACTION; BLOCK_CARD when exposure ≤ $2,500 |
+| `L2` | BLOCK_CARD when exposure > $2,500; BLOCK_ALL_CARDS always; FILE_REPORT always |
 
-**Only `auto` actions may be executed by the agent.** L1/L2 are recommendations.
+**Only `auto` actions may be executed by the agent.** L1/L2 are recommendations
+that wait for a human.
 
-## Rules (R1–R10) — Implementation Pseudocode
+## Rules as Implemented (R1–R10)
 
-### R1. Verify before blocking on weak signal
-```python
-if single_signal and fraud_probability < 0.70:
-    actions.append(VERIFY_WITH_CUSTOMER or STEP_UP_AUTH)
-    # DO NOT add any block action
-    # Blocking on single weak signal is a policy breach
-```
+Inputs read from state: `verdict`, `fraud_probability`, `pattern`, `exposure_usd`,
+`trigger_type`, `customer_response` (`""|denied|confirmed|no_reply`),
+`evidence` (graph/customer/external entries count as signals; documents don't),
+`connected_device_profiles` (shared origin), `jev_classification.coordination`,
+`related_txns` (R5 cleared-purchase check), `evidence_request_count`.
 
-### R2. Customer denies the transaction
-```python
-if customer_denies:
-    actions.append(("BLOCK_CARD", get_block_route(exposure)))
-    actions.append(("CREATE_CASE", "auto"))
-    if exposure > 1000 or shared_device_fraud or other_card_fraud:
-        actions.append(("FILE_REPORT", "L2"))
-```
+- **R1 verify-before-block**: `BLOCK_CARD` is suppressed whenever the case rests
+  on ≤1 independent signal at `fraud_probability < 0.70`; `VERIFY_WITH_CUSTOMER`
+  (or `STEP_UP_AUTH` when fp ≥ 0.70 on multiple signals) is recommended instead,
+  plus `MONITOR_CARD` while unverified.
+- **R2 customer denies**: `BLOCK_CARD` (route by exposure) + `CREATE_CASE`;
+  `FILE_REPORT` via the §3a computation when exposure > $1,000 or a shared
+  device/other-card connection exists.
+- **R3 customer confirms**: verdict treated as `legitimate`; `CLOSE_NO_FRAUD`;
+  never blocks, never files. For disputed-but-legitimate charges, R7 actions apply.
+- **R4 no reply**: `MONITOR_CARD` + `DECLINE_TRANSACTION`; `ESCALATE_TO_ANALYST`
+  when exposure > $500. Not applied when the verdict is already `fraud` on
+  independent evidence.
+- **R5 card testing**: pattern `card_testing` → `DECLINE_TRANSACTION` +
+  `STEP_UP_AUTH`; `BLOCK_CARD` when a related purchase over $100 has cleared.
+- **R6 shared origin**: connected device profiles linking other cards →
+  `CREATE_CASE` + `FILE_REPORT` (L2) + `MONITOR_CONNECTED_CARDS`.
+- **R7 disputed but legitimate**: `customer_report` trigger + legitimate verdict →
+  `CREATE_CASE` + `VERIFY_WITH_CUSTOMER` (unless already confirmed) +
+  `WARN_CUSTOMER`; never blocks.
+- **R8 uncertain and exposed**: `ESCALATE_TO_ANALYST` when uncertain and
+  exposure > $500, or the evidence is unresolved (verification left unanswered at
+  fp ≥ 0.50 counts as conflict).
+- **R9 undocumented coordinated**: pattern `undocumented` with coordination ≥ 0.5
+  (or shared origin) → `CREATE_CASE` + `FILE_REPORT` + `ESCALATE_TO_ANALYST`;
+  the pattern is described in `pattern_description`, never forced into a known type.
+- **R10 guard**: `BLOCK_ALL_CARDS` is stripped from the final list unless ≥2 cards
+  are confirmed fraud/credentials compromised (`confirmed_compromised_card_count ≥ 2`).
+  No engine rule ever emits it; the filter is the standing guard.
 
-### R3. Customer confirms the transaction
-```python
-if customer_confirms:
-    actions = [("CLOSE_NO_FRAUD", "auto")]
-    # Note confirmation in case file
-```
+## Section 3a Triggers
 
-### R4. No reply within 24 hours
-```python
-if no_reply_24h:
-    actions.append(("MONITOR_CARD", "auto"))
-    actions.append(("DECLINE_TRANSACTION", "L1"))  # pending auths
-    if exposure > 500:
-        actions.append(("ESCALATE_TO_ANALYST", "auto"))
-```
+- **CREATE_CASE** whenever `fraud_probability >= 0.30`, evidence was requested,
+  or the customer disputed a charge.
+- **FILE_REPORT** when fraud is confirmed or strongly suspected (`fraud` verdict,
+  or fp ≥ 0.70 without a settling customer confirmation) AND any of: exposure >
+  $1,000; shared device/region/other-customer fraud connection; coordinated or
+  undocumented pattern (R9). `sar.file` always equals `(FILE_REPORT in final)`.
+- A disputed-but-legitimate case still opens a case (R7) and a legitimate
+  risk-score case records `GENERATE_REPORT` instead when no case is required.
 
-### R5. Card testing
-```python
-if card_testing_detected:  # 3+ small online auths in 1h → larger purchase
-    actions.append(("DECLINE_TRANSACTION", "L1"))
-    actions.append(("STEP_UP_AUTH", "auto"))
-    if any_cleared_purchase_over_100:
-        actions.append(("BLOCK_CARD", get_block_route(exposure)))
-```
+## Stopping Conditions (Section 6, implemented in `graph._stop_reason`)
 
-### R6. Shared origin
-```python
-if shared_device_fraud or shared_region_fraud or shared_email_fraud:
-    # Name the shared element in evidence
-    actions.append(("CREATE_CASE", "auto"))
-    actions.append(("FILE_REPORT", "L2"))
-    actions.append(("MONITOR_CONNECTED_CARDS", "auto"))  # every card sharing the element
-```
+The router `evidence_sufficient` stops when one holds:
 
-### R7. Disputed but legitimate (recurring pattern match)
-```python
-if customer_disputes and matches_recurring_pattern:
-    actions.append(("CREATE_CASE", "auto"))
-    actions.append(("VERIFY_WITH_CUSTOMER", "auto"))
-    actions.append(("WARN_CUSTOMER", "auto"))
-    # DO NOT block
-```
+1. `fraud_probability >= 0.85` or `<= 0.15` with ≥2 independent evidence items
+2. A verification response settles the question (`denied`/`confirmed`)
+3. The one evidence-request round completed — further steps are unlikely to
+   change the decision
 
-### R8. Escalate when uncertain and exposed
-```python
-if verdict == "uncertain" and (exposure > 500 or evidence_conflicts):
-    actions.append(("ESCALATE_TO_ANALYST", "auto"))
-```
-
-### R9. Undocumented patterns
-```python
-if evidence_shows_coordinated_abuse and not_known_pattern:
-    pattern = "undocumented"
-    # Describe in pattern_description
-    actions.append(("CREATE_CASE", "auto"))
-    actions.append(("FILE_REPORT", "L2"))
-    actions.append(("ESCALATE_TO_ANALYST", "auto"))
-```
-
-### R10. BLOCK_ALL_CARDS guard
-```python
-if action == "BLOCK_ALL_CARDS":
-    assert (
-        count_cards_with_confirmed_fraud >= 2
-        or credentials_confirmed_compromised
-    ), "R10: need 2+ cards with fraud OR confirmed credential compromise"
-```
-
-## Approval Route Helper
-
-```python
-def get_block_route(exposure_usd: float) -> str:
-    return "L1" if exposure_usd <= 2500 else "L2"
-```
-
-## Case vs Report Decision (Section 3a)
-
-### CREATE_CASE when:
-- `fraud_probability >= 0.30`
-- Evidence was requested
-- Customer disputed a charge
-
-### FILE_REPORT when:
-- Fraud confirmed or strongly suspected AND at least one:
-  - Exposure > $1,000
-  - Shared device profile with another customer's fraud
-  - Shared region cluster with another customer's fraud
-  - Coordinated or undocumented pattern (R9)
-
-### `sar.file` must agree with `FILE_REPORT` in final actions.
-
-## Stopping Conditions (Section 6)
-
-Stop when ONE holds:
-1. `fraud_probability >= 0.85` or `fraud_probability <= 0.15` with **2+ independent evidence**
-2. Verification response settles the question
-3. Further steps unlikely to change the decision (state in `stop_reason`)
-
-**Both early stops and late stops are marked down.**
+`stop_reason` states which condition held; the LLM may refine the wording only.
 
 ## Evidence Request Simulation (Section 5)
 
-Agent may ask without approval:
-- `customer_validation` — ask customer if they made the transaction
-- `step_up_auth` — request OTP/app confirmation
-- `analyst_info` — request information from analyst
+Implemented in `graph.request_evidence` / `simulate_response`:
 
-Responses are NOT provided. Simulate in system, state assumption in `evidence_requests[].assumed_response`.
+- Request type: `customer_validation` for disputes/weak signals,
+  `step_up_auth` for strong fraud lean (fp ≥ 0.70 or fraud-like pattern),
+  `analyst_info` available per policy.
+- The response is simulated deterministically: `denied` when strong fraud
+  evidence exists (fp ≥ 0.70 or fraud-like pattern), `confirmed` when the case
+  matches a legitimate recurring dispute (fp ≤ 0.30, pattern `none`,
+  `customer_report` trigger), otherwise `no_reply`.
+- The assumption is recorded verbatim in `evidence_requests[].assumed_response`
+  and the response enters the evidence list as `source: "customer"`.
+
+## Exposure (Section 4)
+
+`exposure_usd` = sum of `abs(amount)` over `affected_txn_ids` only (the fraud
+episode, flagged txn included). Legitimate verdicts → `0`. Unrelated card
+transactions are never summed.
+
+## Tests
+
+`agent/tests/test_policy.py` covers every rule, route boundary (≤/$ > $2,500),
+section 3a triggers, R10 guard, legitimate path, and R8 escalation (56 tests
+total with `test_answer_writer.py` and `test_flow.py`).
 
 ## Cross-References
 
-- Agent applies these rules: [[Agent-Workflow]] → `apply_policy` node
+- Where rules run: [[Agent-Workflow]] → `apply_policy` node
 - Actions in API: [[API]]
 - Answer format: [[PRD]]
+- Decisions: [[Decisions]]

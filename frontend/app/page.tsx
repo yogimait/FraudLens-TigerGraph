@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FolderOpen, Clock, ShieldAlert, CheckCircle2, AlertTriangle, FileText, Verified, XCircle, Search, Plus, Play, RefreshCw, Loader2, Bell, Sun } from 'lucide-react';
+import { FolderOpen, Clock, ShieldAlert, CheckCircle2, AlertTriangle, XCircle, Search, Plus, Play, Loader2, Bell, Sun } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -82,11 +82,12 @@ export default function Dashboard() {
   });
 
   const kpis = [
-    { title: "Total Cases", value: stats.total || 0, icon: FolderOpen, color: "text-blue-500", bg: "bg-blue-500/10", trend: "+12%" },
-    { title: "In Progress", value: stats.open || 0, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10", trend: null },
-    { title: "Awaiting Approval", value: stats.awaiting_approval || 0, icon: ShieldAlert, color: "text-purple-500", bg: "bg-purple-500/10", trend: "+25%" },
-    { title: "Closed Fraud", value: stats.closed_fraud || 0, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10", trend: null },
-    { title: "Closed Legitimate", value: stats.closed_legitimate || 0, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", trend: "+28%" },
+    { title: "Total Cases", value: stats.total || 0, icon: FolderOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { title: "In Progress", value: stats.open || 0, icon: Clock, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { title: "Awaiting Approval", value: stats.awaiting_approval || 0, icon: ShieldAlert, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { title: "Uncertain", value: stats.uncertain || 0, icon: AlertTriangle, color: "text-blue-400", bg: "bg-blue-400/10" },
+    { title: "Closed Fraud", value: stats.closed_fraud || 0, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
+    { title: "Closed Legitimate", value: stats.closed_legitimate || 0, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
   ];
 
   // REAL DATA AGGREGATION for Trend Chart
@@ -117,12 +118,22 @@ export default function Dashboard() {
   const trendData = generateTrendData();
 
   const donutData = [
-    { name: 'Legitimate', value: stats.closed_legitimate || 1, color: '#10B981' },
-    { name: 'Fraud', value: stats.closed_fraud || 1, color: '#EF4444' },
-    { name: 'Escalated', value: stats.escalated || 1, color: '#F59E0B' },
-    { name: 'Uncertain', value: stats.uncertain || 0, color: '#3B82F6' },
-    { name: 'Pending', value: stats.open || 1, color: '#8B5CF6' }
-  ];
+    { name: 'Legitimate', value: stats.closed_legitimate || 0, color: '#10B981' },
+    { name: 'Fraud', value: stats.closed_fraud || 0, color: '#EF4444' },
+    { name: 'Escalated', value: stats.escalated || 0, color: '#F59E0B' },
+    { name: 'Uncertain', value: stats.uncertain || 0, color: '#8B5CF6' },
+    { name: 'Open', value: stats.open || 0, color: '#3B82F6' },
+    { name: 'Awaiting Approval', value: stats.awaiting_approval || 0, color: '#A78BFA' },
+  ].filter(d => d.value > 0);
+
+  const agentPerf = (() => {
+    const completed = cases.filter(c => c.metadata?.duration_seconds != null);
+    const avgDuration = completed.length
+      ? completed.reduce((s: number, c: any) => s + (c.metadata.duration_seconds || 0), 0) / completed.length
+      : null;
+    const totalToolCalls = cases.reduce((s: number, c: any) => s + (c.tool_calls || 0), 0);
+    return { avgDuration, totalToolCalls, completed: completed.length };
+  })();
 
   return (
     <div className="flex-1 p-8 space-y-8 bg-background relative overflow-y-auto">
@@ -181,9 +192,6 @@ export default function Dashboard() {
                 </div>
                 <div className="flex justify-between items-end">
                   <p className="text-4xl font-serif font-bold text-foreground leading-none">{kpi.value}</p>
-                  {kpi.trend && (
-                    <span className="text-xs font-bold text-emerald-500">{kpi.trend}</span>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -241,37 +249,23 @@ export default function Dashboard() {
 
         <Card className="bg-card/50 border-border shadow-none">
           <div className="p-5 border-b border-border flex justify-between items-center">
-            <h3 className="text-sm font-bold text-foreground">System Performance</h3>
-            <span className="text-xs text-muted-foreground">Last 7 days</span>
+            <h3 className="text-sm font-bold text-foreground">Agent Activity</h3>
+            <span className="text-xs text-muted-foreground">From case metadata</span>
           </div>
           <div className="p-5 space-y-6">
             <div>
               <div className="flex justify-between text-xs mb-2">
-                <span className="text-muted-foreground">Detection Accuracy</span>
-                <span className="font-bold text-foreground">87.4%</span>
-              </div>
-              <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden"><div className="h-full bg-emerald-500 w-[87.4%]"></div></div>
-            </div>
-            <div>
-              <div className="flex justify-between text-xs mb-2">
                 <span className="text-muted-foreground">Avg. Investigation Time</span>
-                <span className="font-bold text-foreground">3.2s</span>
+                <span className="font-bold text-foreground">{agentPerf.avgDuration != null ? `${agentPerf.avgDuration.toFixed(1)}s` : '—'}</span>
               </div>
-              <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden"><div className="h-full bg-primary w-[32%]"></div></div>
+              <div className="text-[10px] text-muted-foreground">across {agentPerf.completed} completed {agentPerf.completed === 1 ? 'case' : 'cases'}</div>
             </div>
             <div>
               <div className="flex justify-between text-xs mb-2">
-                <span className="text-muted-foreground">Resolution Rate</span>
-                <span className="font-bold text-foreground">93.1%</span>
+                <span className="text-muted-foreground">Total Tool Calls</span>
+                <span className="font-bold text-foreground">{agentPerf.totalToolCalls}</span>
               </div>
-              <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden"><div className="h-full bg-emerald-500 w-[93.1%]"></div></div>
-            </div>
-            <div>
-              <div className="flex justify-between text-xs mb-2">
-                <span className="text-muted-foreground">Agent Uptime</span>
-                <span className="font-bold text-foreground">99.9%</span>
-              </div>
-              <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden"><div className="h-full bg-emerald-500 w-[99.9%]"></div></div>
+              <div className="text-[10px] text-muted-foreground">summed across all cases</div>
             </div>
           </div>
         </Card>

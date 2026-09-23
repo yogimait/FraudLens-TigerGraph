@@ -94,28 +94,28 @@ If Jev API is unavailable:
 
 The system must work without Jev, just with reduced speed/quality for classification.
 
-## Integration
+## Implementation (REAL CALLS — implemented)
+
+`agent/jev_client.py` talks to the real TypeSafe API via `typesafe-sdk` 0.7.1 (`TypeSafeClient.system_one`), keyed by `JEV_API_KEY` from `agent/.env`:
+
+- **`classify_fraud_pattern(txn, history, evidence_summary="", coordination_facts=None)`** — one `system_one` request carrying three questions over a compact JSON state (transaction fields + history velocity stats + evidence summary + sharing facts):
+  - `pattern`: **Choice** over the 7 canonical patterns with per-pattern criteria descriptions.
+  - `sufficient`: **Noul** — probability the evidence is sufficient for a defensible decision.
+  - `coordinated`: **Noul** — probability the sharing facts indicate coordination (feeds R6/R9).
+- Standalone `classify_pattern`, `check_sufficiency`, `detect_coordination` wrappers are available for the individual calls.
+- Results are marked `"engine": "jev"` or `"heuristic"`. The heuristic fallback is the deterministic graph logic (small-txn velocity, risk + distance, burst counts); it runs when `JEV_API_KEY` is missing or any API call fails.
+- A **circuit breaker** stops API retries after the first failure, so a dead/unfunded Jev endpoint adds at most one call of latency per process.
+- Backward-compatible keys (`jev_pattern`, `jev_confidence`, `status`) are preserved for `agent/graph.py` / `agent/llm.py`.
+
+**Observed**: with the current `JEV_API_KEY` the API responds `402 no available credits`, so the agent runs on the `heuristic` engine end-to-end; the Jev path activates automatically once credits exist.
 
 ```python
-from jev_sdk import Jev
+from jev_client import classify_fraud_pattern, check_sufficiency, detect_coordination
 
-jev = Jev(api_key=JEV_API_KEY)
-
-# Pattern classification
-result = jev.choice(
-    question="What fraud pattern best explains the evidence?",
-    options=["card_testing", "card_not_present_fraud", ...],
-    state=evidence_state
-)
-
-# Evidence sufficiency
-result = jev.noul(
-    question="Is the current evidence sufficient to make a defensible decision?",
-    state=evidence_state
-)
+result = classify_fraud_pattern(txn, history, evidence_summary, {"shared_devices": 2})
+# {"engine": "jev"|"heuristic", "pattern": "card_testing", "pattern_label": "Card Testing",
+#  "confidence": 0.9, "probabilities": {...}, "sufficiency": 0.7, "coordination": 0.6, ...}
 ```
-
-> **Note**: Verify exact Jev SDK API surface at integration time — the SDK is evolving.
 
 ## Cross-References
 

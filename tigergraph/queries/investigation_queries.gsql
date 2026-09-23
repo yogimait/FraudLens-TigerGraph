@@ -1,0 +1,87 @@
+USE GRAPH FraudGraph
+
+DROP QUERY get_customer_cards
+CREATE QUERY get_customer_cards(STRING cust_id) FOR GRAPH FraudGraph {
+  Start = {Customer.*};
+  
+  Cards = SELECT c FROM Start:s -(OWNS:e)-> Card:c
+          WHERE s.customer_id == cust_id;
+  
+  PRINT Cards;
+}
+
+DROP QUERY get_card_transactions
+CREATE QUERY get_card_transactions(STRING c_id) FOR GRAPH FraudGraph {
+  Start = {Card.*};
+  
+  Txns = SELECT t FROM Start:s -(MADE:e)-> Transaction:t
+         WHERE s.card_id == c_id;
+         
+  PRINT Txns;
+}
+
+DROP QUERY get_transaction_device
+CREATE QUERY get_transaction_device(STRING t_id) FOR GRAPH FraudGraph {
+  Start = {Transaction.*};
+  
+  Devices = SELECT d FROM Start:s -(FROM_DEVICE:e)-> DeviceProfile:d
+            WHERE s.txn_id == t_id;
+            
+  PRINT Devices;
+}
+
+DROP QUERY get_shared_device_cards
+CREATE QUERY get_shared_device_cards(STRING d_id) FOR GRAPH FraudGraph {
+  Seed = {DeviceProfile.*};
+
+  SharedTxns = SELECT t FROM Seed:d -(<FROM_DEVICE:e)- Transaction:t
+               WHERE d.device_profile_id == d_id
+               ORDER BY t.ts ASC;
+
+  PRINT SharedTxns;
+}
+
+DROP QUERY get_card_recent_window
+CREATE QUERY get_card_recent_window(STRING c_id, DATETIME anchor_ts, INT hours) FOR GRAPH FraudGraph {
+  Start = {Card.*};
+
+  DATETIME window_start = datetime_sub(anchor_ts, INTERVAL hours HOUR);
+
+  Txns = SELECT t FROM Start:s -(MADE:e)-> Transaction:t
+         WHERE s.card_id == c_id AND t.ts >= window_start AND t.ts <= anchor_ts
+         ORDER BY t.ts ASC;
+
+  PRINT Txns;
+}
+
+DROP QUERY get_region_activity
+CREATE QUERY get_region_activity(STRING region_id, DATETIME anchor_ts, INT hours) FOR GRAPH FraudGraph {
+  Start = {BillingRegion.*};
+
+  DATETIME window_start = datetime_sub(anchor_ts, INTERVAL hours HOUR);
+
+  Txns = SELECT t FROM Start:r -(<BILLED_IN:e)- Transaction:t
+         WHERE r.region_id == region_id AND t.ts >= window_start AND t.ts <= anchor_ts
+         ORDER BY t.ts ASC;
+
+  PRINT Txns;
+}
+
+DROP QUERY get_card_neighbor_degree
+CREATE QUERY get_card_neighbor_degree(STRING c_id) FOR GRAPH FraudGraph {
+  Start = {Card.*};
+
+  SumAccum<INT> @@txn_count = 0;
+  SumAccum<INT> @@device_count = 0;
+
+  Txns = SELECT t FROM Start:s -(MADE:e)-> Transaction:t
+         WHERE s.card_id == c_id
+         ACCUM @@txn_count += 1;
+
+  Devices = SELECT d FROM Txns:t -(FROM_DEVICE:e)-> DeviceProfile:d
+            ACCUM @@device_count += 1;
+
+  PRINT @@txn_count, @@device_count;
+}
+
+INSTALL QUERY ALL
