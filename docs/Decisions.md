@@ -220,6 +220,8 @@
 
 **Rationale**: The Jev account showed ~130M input tokens consumed (MCP tool sessions + repeated benchmark runs), so paid credits risk another burn. Laya costs $0 and is API-compatible, but its card documents near-chance zero-shot typed-decision accuracy outside its fine-tuned domains and a `noul` label-following defect — both of our Noul call types (sufficiency, coordination) are exposed. Evaluation before adoption is mandatory; the policy engine and verdicts never depend on the decision layer either way.
 
+**Eval result (2026-09-24, `laya-typed-decisions` checkpoint, 4 real cases)**: 3/4 pattern choices matched the LLM's evidence-based pattern (correct on HHG-002 card_not_present_fraud, HHG-013/020 undocumented), but confidence 0.03–0.13 on 7 options (near-random calibration, needs per-domain temperature refit) and a false `undocumented` on HHG-004, a legitimate case. Not adopted; deterministic heuristics ship. Revisit only with a domain temperature refit.
+
 ## Cross-References
 
 - Open questions: [[Questions]]
