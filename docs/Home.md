@@ -1,6 +1,6 @@
-# 🏠 Fraud Investigation Agent — Project Index
+﻿# ðŸ  Fraud Investigation Agent â€” Project Index
 
-> **TigerGraph × Hacker House Goa 2026** — Agentic Fraud Investigation System
+> **TigerGraph Ã— Hacker House Goa 2026** â€” Agentic Fraud Investigation System
 > Deadline: September 24, 2026
 
 ## Quick Links
@@ -12,9 +12,9 @@
 | [[Agent-Workflow]] | Investigation state machine and LangGraph design |
 | [[Data-Model]] | TigerGraph schema, vertices, edges, attributes |
 | [[TigerGraph]] | TigerGraph setup, GSQL queries, MCP, GraphRAG |
-| [[API]] | NestJS ↔ Python Agent ↔ Frontend contract |
+| [[API]] | NestJS â†” Python Agent â†” Frontend contract |
 | [[UI]] | Analyst dashboard pages, components, layout |
-| [[Policy-Engine]] | Deterministic fraud policy rules R1–R10 |
+| [[Policy-Engine]] | Deterministic fraud policy rules R1â€“R10 |
 | [[LLM]] | GPT-OSS-120B responsibilities and structured outputs |
 | [[Jev]] | System One fast classification/routing layer |
 | [[Development-Plan]] | Phased implementation roadmap |
@@ -23,7 +23,8 @@
 | [[Questions]] | Open questions requiring resolution |
 | [[Plan-Validation]] | Consistency check and risk assessment |
 | [[Audit]] | Full project audit vs problem statement (2026-09-23) |
-| [[Demo-Video]] | 3–5 min demo video script (judging-aligned) |
+| [[Demo-Video]] | 3â€“5 min demo video script (judging-aligned) |
+| [[Archive]] | Investigation Archive page (case memory search) |
 
 ## Architecture Overview
 

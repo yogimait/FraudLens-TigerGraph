@@ -77,7 +77,23 @@
 
 ---
 
-## Recording notes
+## Recorded output (2026-09-24)
+
+Final video: `recording/FraudLens-demo.mp4` (3:42, 1080p, 32 MB) — assembled via `recording/assemble.ps1` (ffmpeg).
+
+- 7 screen clips (`recording/act1..7.webm`) captured headlessly with Playwright (`frontend/recorder.js`), 1920×1080, following the act table above.
+- Karan's narration is the master audio track; each act is cut to its narration window. Karan appears as a cropped PiP (lower-right, 420px) throughout.
+- Act 2 shows a live "Re-run Agent" trigger on HHG-014; the run continues off-camera. Known caveat: agent runs take ~155s under free-tier OpenRouter rate limits, exceeding the backend's 120s axios timeout — a live trigger on camera can end in a `failed` status badge. If re-recording, restore state afterwards: `git checkout -- cases/HHG-014.json`, then `agent/scripts/sync_mongo_from_answers.py`, then re-apply the status patch (closed_*/escalated → closed/awaiting_approval, see [[Policy-Engine]] queue expectations).
+- `agent/scripts/sync_mongo_from_answers.py` rebuilds Mongo from the graded `cases/*.json` (utf-8 safe); it is the single source of truth for demo state. Note: it drops Mongoose timestamps — after running it, backfill `createdAt`/`updatedAt` from `metadata.generated_at` (done via pymongo one-liner, see [[Archive]] fix 2026-09-24).
+- Archive page (`/memory`) now shows Recent Investigations by default (top 6 by `updatedAt`) instead of an empty page until a search is typed; verdict/date badges render safely when timestamps are missing.
+- Act 6 shows the global Graph Explorer briefly, then the per-case Graph View on HHG-020 (readable card→txn→case-memory network with hover) — per-case graphs are the readable ones for demos.
+- LangSmith trace shot (Act 2, 1:00–1:08) not captured — needs a logged-in LangSmith tab; the narration covers MCP tooling while the Re-run spinner is shown instead.
+
+### Brag video (secondary share asset, 2026-09-24)
+
+`brag-output/brag.mp4` — 20s cinematic launch clip (1080p, poster-baked frame 0, `brag.jpg` + `share-copy.txt` alongside). Built with the /brag skill + Hyperframes: hook ("risk score is a reason to look, never a verdict") → trigger → evidence provenance cards → 10% LEGITIMATE verdict dial → AUTO/L1/L2 rulebook → FRAUDLENS logo slam. Composition source in `brag-output/composition/` (`npx hyperframes check` passed, 17/17 WCAG AA). Gitignored as a derived artifact — rebuild via composition + `npx hyperframes render --quality delivery`.
+
+### Original recording notes
 
 - Total narration ≈ 3:40–4:00 at normal pace; trim Act 1 if over.
 - Show, don't claim: when narrating "69 MCP tools", have the MCP self-check output or LangSmith trace visible.

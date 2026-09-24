@@ -25,7 +25,13 @@ export default function CaseMemoryPage() {
   const router = useRouter();
 
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/cases`).then(res => setAllCases(res.data)).catch(console.error);
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/cases`).then(res => {
+      const recent = [...res.data].sort((a, b) =>
+        new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime()
+      );
+      setAllCases(recent);
+      setResults(recent.slice(0, 6));
+    }).catch(console.error);
   }, []);
 
   const handleSearch = () => {
@@ -103,7 +109,7 @@ export default function CaseMemoryPage() {
       </Card>
 
       <AnimatePresence>
-        {hasSearched && !isSearching && (
+        {((!hasSearched && results.length > 0) || (hasSearched && !isSearching)) && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -111,7 +117,7 @@ export default function CaseMemoryPage() {
           >
             <h2 className="text-lg font-serif font-bold text-foreground flex items-center gap-2">
               <Database className="w-5 h-5 text-muted-foreground" />
-              Matched Cases ({results.length})
+              {hasSearched ? `Matched Cases (${results.length})` : `Recent Investigations (${results.length})`}
             </h2>
 
             <div className="grid grid-cols-1 gap-4">
@@ -140,7 +146,7 @@ export default function CaseMemoryPage() {
                           </Badge>
                           <div className="flex items-center text-xs text-muted-foreground gap-1">
                             <Calendar className="w-3 h-3" />
-                            {new Date(result.updatedAt).toLocaleDateString()}
+                            {result.updatedAt ? new Date(result.updatedAt).toLocaleDateString() : ''}
                           </div>
                         </div>
                         <p className="text-sm text-foreground/80 leading-relaxed line-clamp-2">{result.summary || 'No summary available.'}</p>

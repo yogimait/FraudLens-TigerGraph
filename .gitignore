@@ -10,3 +10,8 @@ venv/
 
 # User requested exclusions
 Initial-docs/
+
+# Demo video artifacts (derived)
+recording/
+
+brag-output/
